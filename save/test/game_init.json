@@ -1,0 +1,377 @@
+{
+    "config": {
+        "save_path": "save/test",
+        "seed": 42,
+        "players_number": 4,
+        "players": [
+            {
+                "name": "Serg",
+                "role": "sherif",
+                "max_hp": 4
+            },
+            {
+                "name": "Andy",
+                "role": "renegade",
+                "max_hp": 4
+            },
+            {
+                "name": "Anna",
+                "role": "bandit",
+                "max_hp": 4
+            },
+            {
+                "name": "Igor",
+                "role": "bandit",
+                "max_hp": 4
+            }
+        ],
+        "cards": {
+            "bang": 25,
+            "beer": 6,
+            "miss": 12,
+            "mustang": 2,
+            "scope": 1,
+            "hottie": 4,
+            "saloon": 1,
+            "gatling": 1,
+            "panic": 4,
+            "indians": 2,
+            "fargo": 1,
+            "stagecoach": 2,
+            "volkanic": 2,
+            "scofield": 3,
+            "remington": 1,
+            "carbine": 1,
+            "winchester": 1
+        }
+    },
+    "deck_and_discard": {
+        "deck": [
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "saloon",
+                "card_type": 0
+            },
+            {
+                "card_id": "beer",
+                "card_type": 0
+            },
+            {
+                "card_id": "stagecoach",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "miss",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "gatling",
+                "card_type": 0
+            },
+            {
+                "card_id": "scofield",
+                "card_type": 2
+            },
+            {
+                "card_id": "miss",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "miss",
+                "card_type": 0
+            },
+            {
+                "card_id": "beer",
+                "card_type": 0
+            },
+            {
+                "card_id": "beer",
+                "card_type": 0
+            },
+            {
+                "card_id": "hottie",
+                "card_type": 0
+            },
+            {
+                "card_id": "miss",
+                "card_type": 0
+            },
+            {
+                "card_id": "hottie",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "miss",
+                "card_type": 0
+            },
+            {
+                "card_id": "mustang",
+                "card_type": 1
+            },
+            {
+                "card_id": "panic",
+                "card_type": 0
+            },
+            {
+                "card_id": "carbine",
+                "card_type": 2
+            },
+            {
+                "card_id": "scope",
+                "card_type": 1
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "volkanic",
+                "card_type": 2
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "stagecoach",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "panic",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "scofield",
+                "card_type": 2
+            },
+            {
+                "card_id": "panic",
+                "card_type": 0
+            },
+            {
+                "card_id": "scofield",
+                "card_type": 2
+            },
+            {
+                "card_id": "hottie",
+                "card_type": 0
+            },
+            {
+                "card_id": "beer",
+                "card_type": 0
+            },
+            {
+                "card_id": "fargo",
+                "card_type": 0
+            },
+            {
+                "card_id": "miss",
+                "card_type": 0
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "remington",
+                "card_type": 2
+            },
+            {
+                "card_id": "panic",
+                "card_type": 0
+            },
+            {
+                "card_id": "miss",
+                "card_type": 0
+            },
+            {
+                "card_id": "miss",
+                "card_type": 0
+            },
+            {
+                "card_id": "winchester",
+                "card_type": 2
+            },
+            {
+                "card_id": "bang",
+                "card_type": 0
+            },
+            {
+                "card_id": "indians",
+                "card_type": 0
+            }
+        ],
+        "discard_pile": []
+    },
+    "players": [
+        {
+            "name": "Serg",
+            "role": "sherif",
+            "max_hp": 4,
+            "cur_hp": 5,
+            "weapon": "default",
+            "hand": [
+                {
+                    "card_id": "bang",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "beer",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "mustang",
+                    "card_type": 1
+                },
+                {
+                    "card_id": "bang",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "bang",
+                    "card_type": 0
+                }
+            ],
+            "effects": []
+        },
+        {
+            "name": "Andy",
+            "role": "renegade",
+            "max_hp": 4,
+            "cur_hp": 4,
+            "weapon": "default",
+            "hand": [
+                {
+                    "card_id": "bang",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "bang",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "volkanic",
+                    "card_type": 2
+                },
+                {
+                    "card_id": "miss",
+                    "card_type": 0
+                }
+            ],
+            "effects": []
+        },
+        {
+            "name": "Anna",
+            "role": "bandit",
+            "max_hp": 4,
+            "cur_hp": 4,
+            "weapon": "default",
+            "hand": [
+                {
+                    "card_id": "miss",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "hottie",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "indians",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "beer",
+                    "card_type": 0
+                }
+            ],
+            "effects": []
+        },
+        {
+            "name": "Igor",
+            "role": "bandit",
+            "max_hp": 4,
+            "cur_hp": 4,
+            "weapon": "default",
+            "hand": [
+                {
+                    "card_id": "miss",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "bang",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "miss",
+                    "card_type": 0
+                },
+                {
+                    "card_id": "bang",
+                    "card_type": 0
+                }
+            ],
+            "effects": []
+        }
+    ],
+    "players_order": [
+        "Serg",
+        "Andy",
+        "Anna",
+        "Igor"
+    ]
+}

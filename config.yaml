@@ -1,0 +1,44 @@
+save_path: save/test
+seed: 42
+players_number: 4
+players:
+  -
+      name: Serg # имена должны быть уникальными
+      role: sherif
+      max_hp: 4
+
+  -
+      name: Andy
+      role: renegade
+      max_hp: 4
+
+  -
+      name: Anna
+      role: bandit
+      max_hp: 4
+
+  -
+      name: Igor
+      role: bandit
+      max_hp: 4
+
+cards: # Стандартный набор карт
+#  bang: 25
+#  beer: 6
+#  miss: 12
+#  mustang: 2
+#  scope: 1
+#  hottie: 4
+#  saloon: 1
+#  gatling: 1
+#  panic: 4
+#  indians: 2
+#  fargo: 1
+#  stagecoach: 2
+#  volkanic: 2
+#  scofield: 3
+#  remington: 1
+#  carbine: 1
+#  winchester: 1
+  bang: 25
+  indians: 25
