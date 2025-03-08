@@ -218,14 +218,23 @@ class Game:
 
         for outlier in outliers:
             key = outlier.get_state_log()['name']
+            self.__players[key].death()
             del self.__players[key]
             self.__players_order.remove(key)
 
         outliers = {player.get_state_log()['name']: Role(player.get_state_log()['role']) for player in outliers}
         return outliers
 
+
     def make_post_death_events(self, outliers: Union[dict[str, Role], dict[Never]]):
-        pass
+        for outlier_role in outliers.values():
+            match outlier_role.value:
+                case Role.BANDIT:
+                    self.__get_current_player_state().draw_cards(3)
+                case Role.SHERIFF_ASSISTANT:
+                    if Role(self.__get_current_player_state().get_state_log()['role']) == Role.SHERIFF:
+                        self.__get_current_player_state().death()
+
 
     def __check_game_over(self) -> GameResult:
         alive_roles = defaultdict(int)

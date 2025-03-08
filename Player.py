@@ -94,6 +94,18 @@ class Player:
         if self.__cur_hp + 1 <= self.__max_hp:
             self.__cur_hp += 1
 
+    def death(self):
+        for card in self.__hand:
+            self.__deck.discard(card)
+        self.__hand = []
+        for card in self.__effects:
+            self.__deck.discard(card)
+        self.__effects = []
+        if isinstance(self.__weapon, Card):
+            self.__deck.discard(self.__weapon)
+        self.__weapon = "default"
+
+
 
     def discard_cards_from_hand(self, discarded_cards: Union[list[Card], Card]) -> list[Card]:
         if not isinstance(discarded_cards, list):
