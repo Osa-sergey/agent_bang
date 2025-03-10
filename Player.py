@@ -9,13 +9,14 @@ from Role import Role
 from Utils import GameEncoder
 
 class PlayerActionResponse(Enum):
-    BANG = 0
-    MISS = 1
+    BANG = "bang"
+    MISS = "miss"
+    PASS = "pass"
 
 class Player:
     def __init__(self, deck: Deck, hand: list[Card], player_config):
         self.__deck = deck
-        self.__name = player_config.name
+        self.name = player_config.name
         self.__role = Role(player_config.role)
         self.__hand = hand
 
@@ -29,7 +30,7 @@ class Player:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Player):
             return False
-        return self.__name == other.__name and self.__role == other.__role
+        return self.name == other.name and self.__role == other.__role
 
 
     def get_dist_modifiers(self):
@@ -90,9 +91,12 @@ class Player:
         self.__cur_hp -= 1
 
 
-    def increase_health(self):
+    def increase_health(self) -> bool:
         if self.__cur_hp + 1 <= self.__max_hp:
             self.__cur_hp += 1
+            return True
+        return False
+
 
     def death(self):
         for card in self.__hand:
@@ -121,7 +125,8 @@ class Player:
 
 
     def need_to_discard(self) -> int:
-        if num_discard_cards := len(self.__hand) - self.__cur_hp > 0:
+        num_discard_cards = len(self.__hand) - self.__cur_hp
+        if num_discard_cards > 0:
             return num_discard_cards
         else:
             return 0
@@ -142,7 +147,7 @@ class Player:
 
     def get_game_state(self):
         return {
-            "name": self.__name,
+            "name": self.name,
             "role": Role.SHERIFF.value if self.__role == Role.SHERIFF else "unknown",
             "max_hp": self.__max_hp,
             "cur_hp": self.__cur_hp,
@@ -155,7 +160,7 @@ class Player:
 
     def get_state_log(self):
         return {
-            "name": self.__name,
+            "name": self.name,
             "role": self.__role.value,
             "max_hp": self.__max_hp,
             "cur_hp": self.__cur_hp,
@@ -168,7 +173,7 @@ class Player:
     def __str__(self):
         hand = json.dumps(self.__hand, cls=GameEncoder, indent=4)
         effects = json.dumps(self.__effects, cls=GameEncoder, indent=4)
-        return (f"""Person name='{self.__name}'
+        return (f"""Person name='{self.name}'
          {'===' * 20}
          role='{self.__role}',
          weapon='{self.__weapon}',

@@ -4,7 +4,6 @@ import random
 from collections import defaultdict
 from enum import Enum
 from typing import Optional, Any, Generator, Never, Union
-from wsgiref.util import request_uri
 
 from omegaconf import OmegaConf
 
@@ -37,16 +36,22 @@ class Game:
         self.players_game_state = self.__get_players_game_state()
         # self.__save_init_game_state()
 
+    def get_player_names(self):
+        return self.__players_order
 
     def __get_current_player_state(self):
         return self.__players[self.__players_order[self.__current_turn]]
 
 
     def __get_players_game_state(self):
-        return {player_name: player_state.get_game_state() for player_name, player_state in self.__players.items()}
+        return {
+            "players": {player_name: player_state.get_game_state() for player_name, player_state in self.__players.items()},
+            "players_order": self.__players_order,
+            "current_player": self.current_player_state.name
+                }
 
 
-    def play_card(self, card: Card, options: Optional[dict[str, Any]] = None) -> Generator[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    def play_card(self, card: Card, options: Optional[dict[str, Any]] = None) -> Generator[dict[str, Any], dict[str, PlayerActionResponse], dict[str, Any]]:
         outliers = {}
         if self.current_player_state.has_card(card):
             match card.card_type:
@@ -63,7 +68,7 @@ class Game:
         return {"outliers": outliers, "game_status": self.__check_game_over()}
 
 
-    def __play_action_card(self, card: Card, options: Optional[dict[str, Any]] = None)-> Generator[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    def __play_action_card(self, card: Card, options: Optional[dict[str, Any]] = None)-> Generator[dict[str, Any], dict[str, PlayerActionResponse], dict[str, Role]]:
         outliers = {}
         match card.card_id:
             case CardID.STAGECOACH:
@@ -148,7 +153,8 @@ class Game:
 
             case CardID.BEER:
                 if len(self.__players) > 2:
-                    self.current_player_state.increase_health()
+                    if not self.current_player_state.increase_health():
+                        raise Exception("У игрока максимальное здоровье, пиво не действует")
 
             case CardID.BANG:
                 opponent = options.get("opponent", "default")
@@ -161,7 +167,7 @@ class Game:
                 if not self.current_player_state.can_use_weapon:
                     raise Exception("Вы израсходовали все выстрелы в этом ходу")
 
-                if not self.current_player_state.get_state_log()['weapon'] != Card(CardID.VOLKANIC):
+                if self.current_player_state.get_state_log()['weapon'] != Card(CardID.VOLKANIC):
                     self.current_player_state.can_use_weapon = False
 
                 request = {"request": CardActionRequest.RESPONSE_TO_BANG, "opponent": opponent}
@@ -208,7 +214,7 @@ class Game:
     def __update_live_list(self) -> Union[dict[str, Role], dict[Never]]:
         outliers = self.__check_for_update_live_list()
         if outliers:
-            self.make_post_death_events(outliers)
+            self.__make_post_death_events(outliers)
         return outliers
 
 
@@ -226,7 +232,7 @@ class Game:
         return outliers
 
 
-    def make_post_death_events(self, outliers: Union[dict[str, Role], dict[Never]]):
+    def __make_post_death_events(self, outliers: Union[dict[str, Role], dict[Never]]):
         for outlier_role in outliers.values():
             match outlier_role.value:
                 case Role.BANDIT:
@@ -251,6 +257,9 @@ class Game:
             return GameResult.RENEGADE_WIN
         else:
             return GameResult.NO_WINNERS
+
+    def start_of_turn(self):
+        self.current_player_state.start_of_turn()
 
     def end_of_turn(self):
         self.current_player_state.end_of_turn()

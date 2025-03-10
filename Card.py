@@ -32,11 +32,15 @@ class CardActionRequest(Enum):
       RESPONSE_TO_INDIANS = 0
 
 
-
 class Card:
     def __init__(self, card_id: CardID):
         self.card_id = card_id
         self.card_type = self.__get_card_type()
+
+
+    def __hash__(self):
+        return hash((self.card_id, self.card_type))
+
 
     def __eq__(self, other):
         if isinstance(other, Card):
