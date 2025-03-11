@@ -89,7 +89,7 @@ class UserAgent(Agent):
     def __init__(self, agent_name: str,
                  config: dict[str, Any],
                  player: Player,
-                 shared_memory: list[dict[[str, Any]]]):
+                 shared_memory: MemoryList):
         super().__init__(agent_name, config, player, shared_memory)
 
     def choice_card_for_play(self) -> str:
