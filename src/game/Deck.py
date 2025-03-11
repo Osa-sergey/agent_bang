@@ -3,9 +3,9 @@ from collections import deque
 
 from omegaconf import OmegaConf
 
-from Card import Card, CardID
-from Config import Config
-from Utils import shuffle
+from src.game.Card import Card, CardID
+from src.game.Config import Config
+from src.game.Utils import shuffle
 
 
 class Deck:

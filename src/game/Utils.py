@@ -4,8 +4,9 @@ import datetime
 from enum import Enum
 from json import JSONEncoder
 
-from Card import Card
-from Role import Role
+from src.game.Card import Card
+from src.game.Role import Role
+
 
 class GameEncoder(JSONEncoder):
     def default(self, obj):

@@ -7,12 +7,12 @@ from typing import Optional, Any, Generator, Never, Union
 
 from omegaconf import OmegaConf
 
-from Config import Config
-from Player import Player, PlayerActionResponse
-from Role import Role
-from Deck import Deck
-from Utils import check_player_roles, GameEncoder
-from Card import Card, CardType, CardID, CardActionRequest
+from src.game.Card import Card, CardType, CardID, CardActionRequest
+from src.game.Config import Config
+from src.game.Deck import Deck
+from src.game.Player import Player, PlayerActionResponse
+from src.game.Role import Role
+from src.game.Utils import check_player_roles, GameEncoder
 
 
 class GameResult(Enum):

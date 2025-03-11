@@ -3,10 +3,10 @@ import random
 from enum import Enum
 from typing import Union
 
-from Card import Card, CardID, CardType
-from Deck import Deck
-from Role import Role
-from Utils import GameEncoder
+from src.game.Card import Card, CardID, CardType
+from src.game.Deck import Deck
+from src.game.Role import Role
+from src.game.Utils import GameEncoder
 
 
 class PlayerActionResponse(Enum):

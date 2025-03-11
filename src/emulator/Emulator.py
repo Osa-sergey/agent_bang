@@ -7,13 +7,14 @@ from pprint import pprint
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from Agent import Agent, AgentType, UserAgent
-from Card import Card, CardID, CardActionRequest
-from Config import Config
-from Game import Game, GameResult
-from Memory import MemoryList
-from Player import Player, PlayerActionResponse
-from Utils import GameEncoder
+from src.agent.Agent import Agent, AgentType
+from src.emulator.LoggedList import LoggedList
+from src.game.Card import Card, CardID, CardActionRequest
+from src.game.Config import Config
+from src.game.Game import Game, GameResult
+from src.game.Player import Player, PlayerActionResponse
+from src.game.Utils import GameEncoder
+from src.agent.UserAgent import UserAgent
 
 
 class LogEventType(Enum):
@@ -36,11 +37,11 @@ class GameEmulator:
         self.__config = Config()
         self.__config.init(config_path)
         self.__game = Game()
-        self.__shared_memory = MemoryList(self._write_json_log, "shared_memory_log.jsonl")
+        self.__shared_memory = LoggedList(self._write_json_log, "shared_memory_log.jsonl")
         self.__agents = self.__init_agents(self.__game, self.__shared_memory, config=Config().config)
 
     @staticmethod
-    def __init_agents(game: Game, shared_memory: list[dict[[str, Any]]], config) -> dict[str, Agent]:
+    def __init_agents(game: Game, shared_memory: LoggedList, config) -> dict[str, Agent]:
         agents = {}
         for agent_name, agent_config in config.agents.items():
             match AgentType(agent_config["agent_type"]):
