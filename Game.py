@@ -34,24 +34,35 @@ class Game:
         self.__current_turn = 0
         self.current_player_state = self.__get_current_player_state()
         self.players_game_state = self.__get_players_game_state()
-        # self.__save_init_game_state()
+        self.__save_init_game_state()
 
     def get_player_names(self):
         return self.__players_order
 
+    def get_player(self, name: str) -> Player:
+        return self.__players[name]
+
     def __get_current_player_state(self):
         return self.__players[self.__players_order[self.__current_turn]]
 
+    def get_game_log(self):
+        return {
+            "deck_and_discard": self.__deck.get_state_log(),
+            "players": [player.get_state_log() for player in self.__players.values()],
+            "players_order": self.__players_order
+        }
 
     def __get_players_game_state(self):
         return {
-            "players": {player_name: player_state.get_game_state() for player_name, player_state in self.__players.items()},
+            "players": {player_name: player_state.get_game_state()
+                        for player_name, player_state in self.__players.items()},
             "players_order": self.__players_order,
             "current_player": self.current_player_state.name
                 }
 
-
-    def play_card(self, card: Card, options: Optional[dict[str, Any]] = None) -> Generator[dict[str, Any], dict[str, PlayerActionResponse], dict[str, Any]]:
+    def play_card(self, card: Card, options: Optional[dict[str, Any]] = None) -> Generator[dict[str, Any],
+                                                                                    dict[str, PlayerActionResponse],
+                                                                                    dict[str, Any]]:
         outliers = {}
         if self.current_player_state.has_card(card):
             match card.card_type:
@@ -63,22 +74,22 @@ class Game:
                 case CardType.WEAPON:
                     self.current_player_state.play_weapon_card(card)
         else:
-            raise Exception("нет карты в руке")
+            raise Exception(f"Card {card} not in hand")
         self.players_game_state = self.__get_players_game_state()
         return {"outliers": outliers, "game_status": self.__check_game_over()}
 
-
-    def __play_action_card(self, card: Card, options: Optional[dict[str, Any]] = None)-> Generator[dict[str, Any], dict[str, PlayerActionResponse], dict[str, Role]]:
+    def __play_action_card(self, card: Card, options: Optional[dict[str, Any]] = None) -> Generator[dict[str, Any],
+                                                                                        dict[str, PlayerActionResponse],
+                                                                                        dict[str, Role]]:
         outliers = {}
         match card.card_id:
             case CardID.STAGECOACH:
                 self.current_player_state.draw_cards(2)
-
             case CardID.FARGO:
                 self.current_player_state.draw_cards(3)
-
             case CardID.INDIANS:
-                opponents = [player for player in self.__players_order if player != self.__players_order[self.__current_turn]]
+                opponents = [player for player in self.__players_order
+                             if player != self.__players_order[self.__current_turn]]
                 for opponent in opponents:
                     request = {"request": CardActionRequest.RESPONSE_TO_INDIANS, "opponent": opponent}
                     self.current_player_state = self.__players[opponent]
@@ -90,9 +101,9 @@ class Game:
                         self.current_player_state.decrease_health()
                         self.__beer_save()
                         outliers = self.__update_live_list()
-
             case CardID.GATLING:
-                opponents = [player for player in self.__players_order if player != self.__players_order[self.__current_turn]]
+                opponents = [player for player in self.__players_order
+                             if player != self.__players_order[self.__current_turn]]
                 for opponent in opponents:
                     request = {"request": CardActionRequest.RESPONSE_TO_GATLING, "opponent": opponent}
                     self.current_player_state = self.__players[opponent]
@@ -104,7 +115,6 @@ class Game:
                         self.current_player_state.decrease_health()
                         self.__beer_save()
                         outliers = self.__update_live_list()
-
             case CardID.PANIC:
                 opponent = options.get("opponent", "default")
                 action_type = options.get("action_type", "from_hand")
@@ -113,7 +123,7 @@ class Game:
 
                 cur_player_name = self.__players_order[self.__current_turn]
                 if self.__distance_to_opponent(cur_player_name, opponent) > 1:
-                    raise Exception("оппонент слишком далеко")
+                    raise Exception("The opponent is too far away")
 
                 if action_type == "from_hand":
                     self.current_player_state.add_card_to_hand(self.__players[opponent].get_random_card_from_hand())
@@ -121,14 +131,13 @@ class Game:
                     try:
                         card_for_steal = Card(CardID(options.get("card")))
                     except:
-                        raise Exception("такой карты в игре не существует")
+                        raise Exception(f"Card {options.get('card')} doesn't exist in the game")
                     try:
                         self.current_player_state.add_card_to_hand(
                             self.__players[opponent].get_card_from_game(card_for_steal)
                         )
                     except Exception as e:
                         raise Exception(str(e))
-
             case CardID.HOTTIE:
                 opponent = options.get("opponent", "default")
                 action_type = options.get("action_type", "from_hand")
@@ -141,21 +150,18 @@ class Game:
                     try:
                         card_for_discard = Card(CardID(options.get("card")))
                     except:
-                        raise Exception("такой карты в игре не существует")
+                        raise Exception(f"Card {options.get('card')} doesn't exist in the game")
                     try:
                            self.__deck.discard(self.__players[opponent].get_card_from_game(card_for_discard))
                     except Exception as e:
                         raise Exception(str(e))
-
             case CardID.SALOON:
                 for player in self.__players.values():
                     player.increase_health()
-
             case CardID.BEER:
                 if len(self.__players) > 2:
                     if not self.current_player_state.increase_health():
-                        raise Exception("У игрока максимальное здоровье, пиво не действует")
-
+                        raise Exception("The player is at maximum health, the beer has no effect")
             case CardID.BANG:
                 opponent = options.get("opponent", "default")
                 self.__check_opponent_availability(opponent)
@@ -163,9 +169,9 @@ class Game:
                 cur_player_name = self.__players_order[self.__current_turn]
                 if (not self.__distance_to_opponent(cur_player_name, opponent)
                         <= self.current_player_state.get_state_log()['weapon_range']):
-                    raise Exception("оппонент слишком далеко")
+                    raise Exception("The opponent is too far away")
                 if not self.current_player_state.can_use_weapon:
-                    raise Exception("Вы израсходовали все выстрелы в этом ходу")
+                    raise Exception("You've used up all your shots this turn")
 
                 if self.current_player_state.get_state_log()['weapon'] != Card(CardID.VOLKANIC):
                     self.current_player_state.can_use_weapon = False
@@ -181,7 +187,6 @@ class Game:
                     self.__beer_save()
                     outliers = self.__update_live_list()
 
-
         self.current_player_state = self.__get_current_player_state()
         self.current_player_state.discard_cards_from_hand(card)
         return outliers
@@ -189,8 +194,7 @@ class Game:
     def __check_opponent_availability(self, opponent: str):
         cur_player_name = self.__players_order[self.__current_turn]
         if opponent not in self.__players_order or opponent == cur_player_name:
-            raise Exception("такого оппонента не существует или это вы сами")
-
+            raise Exception("This opponent doesn't exist, or is it just you")
 
     def __distance_to_opponent(self, cur_player_name: str, opponent: str) -> bool:
         index_1 = self.__players_order.index(cur_player_name)
@@ -202,7 +206,6 @@ class Game:
                           - self.__players[cur_player_name].get_dist_modifiers()["for_shoot"])
         return min_dist + dist_modifiers
 
-
     def __beer_save(self):
         if self.current_player_state.get_health() < 1 and len(self.__players) > 2:
             beer_card = Card(CardID.BEER)
@@ -210,13 +213,11 @@ class Game:
                 self.current_player_state.increase_health()
                 self.current_player_state.discard_cards_from_hand(beer_card)
 
-
     def __update_live_list(self) -> Union[dict[str, Role], dict[Never]]:
         outliers = self.__check_for_update_live_list()
         if outliers:
             self.__make_post_death_events(outliers)
         return outliers
-
 
     def __check_for_update_live_list(self) -> Union[dict[str, Role], dict[Never]]:
         outliers = [player_state for player_state in self.__players.values()
@@ -231,7 +232,6 @@ class Game:
         outliers = {player.get_state_log()['name']: Role(player.get_state_log()['role']) for player in outliers}
         return outliers
 
-
     def __make_post_death_events(self, outliers: Union[dict[str, Role], dict[Never]]):
         for outlier_role in outliers.values():
             match outlier_role.value:
@@ -240,7 +240,6 @@ class Game:
                 case Role.SHERIFF_ASSISTANT:
                     if Role(self.__get_current_player_state().get_state_log()['role']) == Role.SHERIFF:
                         self.__get_current_player_state().death()
-
 
     def __check_game_over(self) -> GameResult:
         alive_roles = defaultdict(int)
@@ -270,13 +269,12 @@ class Game:
         self.current_player_state = self.__get_current_player_state()
         self.players_game_state = self.__get_players_game_state()
 
-
     def __save_init_game_state(self):
         path_to_save = self.config.save_path
         if not path_to_save:
-            raise Exception('Заполните путь для сохранения игры')
+            raise Exception('Fill in the path to save the game')
         if os.path.exists(path_to_save) and os.listdir(path_to_save):
-            raise Exception('Папка для сохранения с таким именем уже существует')
+            raise Exception('A save folder with this name already exists')
         os.makedirs(path_to_save, exist_ok=True)
 
         game_state = {
@@ -289,7 +287,6 @@ class Game:
         with open(os.path.join(path_to_save, 'game_init.json'), 'w', encoding='utf-8') as f:
             json.dump(game_state, f, indent=4, cls=GameEncoder)
 
-
     def __create_players(self) -> dict[str, Player]:
         hands = self.__init_players_hand()
         players = {}
@@ -297,7 +294,6 @@ class Game:
             name = player_config.name
             players[name] = Player(self.__deck, hands[name], player_config)
         return players
-
 
     def __init_players_hand(self) -> defaultdict[str, list[Card]]:
         hands = defaultdict(list)

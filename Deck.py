@@ -13,10 +13,8 @@ class Deck:
         self.__deck = self.__init_cards()
         self.__discard_pile = deque()
 
-
     def get_state_log(self):
         return {"deck": self.__deck, "discard_pile": self.__discard_pile}
-
 
     @staticmethod
     def __init_cards() -> deque:
@@ -29,10 +27,8 @@ class Deck:
         shuffle(cards_deque)
         return cards_deque
 
-
     def discard(self, card: Card):
         self.__discard_pile.append(card)
-
 
     def draw(self) -> typing.Union[Card, None]:
         if not self.__deck:

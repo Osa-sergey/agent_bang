@@ -27,9 +27,9 @@ class CardType(Enum):
 
 
 class CardActionRequest(Enum):
-      RESPONSE_TO_BANG = 2
-      RESPONSE_TO_GATLING = 1
-      RESPONSE_TO_INDIANS = 0
+      RESPONSE_TO_BANG = "response to bang"
+      RESPONSE_TO_GATLING = "response to gatling"
+      RESPONSE_TO_INDIANS = "response to indians"
 
 
 class Card:
@@ -37,15 +37,16 @@ class Card:
         self.card_id = card_id
         self.card_type = self.__get_card_type()
 
-
     def __hash__(self):
         return hash((self.card_id, self.card_type))
-
 
     def __eq__(self, other):
         if isinstance(other, Card):
             return self.card_id.value == other.card_id.value and self.card_type.value == other.card_type.value
         return False
+
+    def __str__(self):
+        return f"card name: {self.card_id.value} card type {self.card_type.name}"
 
     def __get_card_type(self) -> CardType:
         match self.card_id:
@@ -55,7 +56,6 @@ class Card:
                 return CardType.EFFECT
             case _:
                 return CardType.ACTION
-
 
     def get_range(self):
         match self.card_id:
@@ -70,6 +70,6 @@ class Card:
             case CardID.WINCHESTER:
                 return 5
             case _:
-                raise Exception("Поддерживается только CardType.WEAPON")
+                raise Exception("Support only CardType.WEAPON")
 
 

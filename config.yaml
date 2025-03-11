@@ -3,7 +3,7 @@ seed: 42
 players_number: 4
 players:
   -
-      name: serg # имена должны быть уникальными
+      name: serg # names must be unique
       role: sherif
       max_hp: 4
 
@@ -22,7 +22,18 @@ players:
       role: bandit
       max_hp: 4
 
-cards: # Стандартный набор карт
+agents:
+  # name from players
+  serg:
+    agent_type: user_agent
+  andy:
+    agent_type: user_agent
+  anna:
+    agent_type: user_agent
+  igor:
+    agent_type: user_agent
+
+cards: # base card set
   bang: 25
   beer: 6
   miss: 12

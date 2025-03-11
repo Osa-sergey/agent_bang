@@ -1,5 +1,6 @@
 import random
 from collections import deque
+import datetime
 from enum import Enum
 from json import JSONEncoder
 
@@ -9,19 +10,20 @@ from Role import Role
 class GameEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Enum):
-            return obj.value
+            return {"name": obj.name, "value": obj.value}
         if isinstance(obj, deque):
             return list(obj)
+        if isinstance(obj, datetime.datetime):
+            return obj.isoformat()
         if isinstance(obj, Card):
             return {"card_id": obj.card_id.value, "card_type": obj.card_type.value}
         return super().default(obj)
 
-
 def check_player_roles(config):
     if len(config.players) != config.players_number:
-        raise Exception('Поле players_number не равно количеству игроков')
+        raise Exception('The players_number field is not equal to the number of players')
     if config.players_number < 4 or  config.players_number > 7:
-        raise Exception('Количество игроков не соответсвует допустимому кол-ву игроков в правилах')
+        raise Exception('The number of players does not correspond to the allowed number of players in the rules')
 
     roles = {}
     match config.players_number:
@@ -40,8 +42,7 @@ def check_player_roles(config):
 
     for role_n in roles.values():
         if role_n != 0:
-            raise Exception("Набор ролей не соответсвует правилам и количеству игроков")
-
+            raise Exception("The set of roles does not correspond to the rules and the number of players")
 
 def shuffle(items):
     random.shuffle(items)
