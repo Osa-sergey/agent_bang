@@ -4,11 +4,11 @@ import os.path
 from collections import defaultdict
 from enum import Enum
 from pprint import pprint
-from typing import Any
+from typing import Any, Optional, Callable, Union
 from zoneinfo import ZoneInfo
 
 from src.agent.Agent import Agent, AgentType
-from src.emulator.LoggedList import LoggedList
+from src.emulator.LoggedList import LoggedList, SavePath
 from src.game.Card import Card, CardID, CardActionRequest
 from src.game.Config import Config
 from src.game.Game import Game, GameResult
@@ -33,12 +33,25 @@ class LogEventType(Enum):
 
 class GameEmulator:
 
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str,
+                 current_player_state_render: Optional[Callable[[Player], None]] = None,
+                 players_game_state_render: Optional[Callable[[dict[str, Any]], None]] = None,
+                 use_gui: bool = False):
         self.__config = Config()
         self.__config.init(config_path)
-        self.__game = Game()
-        self.__shared_memory = LoggedList(self._write_json_log, "shared_memory_log.jsonl")
+        self.use_gui = use_gui
+        Config().config.gui = self.use_gui
+        self.__game = Game(current_player_state_render, players_game_state_render)
+        self.__shared_memory = LoggedList(self._write_json_log, SavePath.SHARED_MEMORY)
         self.__agents = self.__init_agents(self.__game, self.__shared_memory, config=Config().config)
+
+    @property
+    def shared_memory(self):
+        return self.__shared_memory
+
+    @property
+    def current_agent(self):
+        return self.__agents[self.__game.current_player_state.name]
 
     @staticmethod
     def __init_agents(game: Game, shared_memory: LoggedList, config) -> dict[str, Agent]:
@@ -50,22 +63,52 @@ class GameEmulator:
                     agents[agent_name] = UserAgent(agent_name, config, player, shared_memory)
         return agents
 
+    def draw_state(self):
+        _ = self.__game.players_game_state
+        _ = self.__game.current_player_state
+
+    def start_of_turn(self):
+        _ = self.__game.players_game_state
+        player_state = self.__game.current_player_state
+        print("===" * 15, f"Turn player: {player_state.name}", "===" * 15)
+        self._write_json_log({"turn_player": player_state.name})
+        self._write_json_log({"current_player_state": player_state.get_state_log()})
+        self.__shared_memory.append({"type": LogEventType.TURN_PLAYER, "value": player_state.name})
+        self.__game.start_of_turn()
+        self._write_json_log({"current_player_state_after_draw": player_state.get_state_log()})
+        self.__print_game_state()
+
+    def gui_game(self):
+        agent = self.current_agent
+        if not isinstance(agent, UserAgent):
+            self.auto_play()
+        else:
+            self.start_of_turn()
+
+    def __one_player_game_circle(self):
+        self.start_of_turn()
+        game_result = self.__play_cards()
+        if game_result != GameResult.NO_WINNERS:
+            print("===" * 15, "END OF GAME", "===" * 15)
+            print(game_result.name)
+            return
+        self.end_of_turn()
+
+    def end_of_turn(self):
+        self.__discard_cards()
+        self.__game.end_of_turn()
+
+    def auto_play(self):
+        while True:
+            self.__one_player_game_circle()
+
+            agent = self.current_agent
+            if isinstance(agent, UserAgent):
+                return
+
     def play_game(self):
         while True:
-            player_state = self.__game.current_player_state
-            print("===" * 15, f"Turn player: {player_state.name}", "===" * 15)
-            self._write_json_log({"turn_player": player_state.name})
-            self._write_json_log({"current_player_state": player_state.get_state_log()})
-            self.__shared_memory.append({"type": LogEventType.TURN_PLAYER, "value": player_state.name})
-            self.__game.start_of_turn()
-            self._write_json_log({"current_player_state_after_draw": player_state.get_state_log()})
-            self.__print_game_state()
-            game_result = self.__play_cards()
-            if game_result != GameResult.NO_WINNERS:
-                print("===" * 15, "END OF GAME", "===" * 15)
-                print(game_result.name)
-            self.__discard_cards()
-            self.__game.end_of_turn()
+            self.__one_player_game_circle()
 
     def _write_json_log(self, data: dict[str, Any], file_name: str = "game_log.jsonl"):
         log_file = os.path.join(self.__config.config.save_path, file_name)
@@ -81,14 +124,10 @@ class GameEmulator:
         print("===" * 15, "Current player", "===" * 15)
         print(self.__game.current_player_state)
 
-
-    def __play_cards(self) -> GameResult:
-        while True:
-            card = self.__get_card_for_play()
-            self.__shared_memory.append({"type": LogEventType.PLAY_CARD, "value": card})
-            self._write_json_log({"play_card": card})
-            if card == "end":
-                break
+    def play_card(self, card:  dict[str, dict[str, Any] | Card] | str) -> dict[str, Union[GameResult, bool]]:
+        self.__shared_memory.append({"type": LogEventType.PLAY_CARD, "value": card})
+        self._write_json_log({"play_card": card})
+        if card != "end":
             card, options = card["card"], card["options"]
             generator_play_card = self.__game.play_card(card, options=options)
             try:
@@ -103,13 +142,22 @@ class GameEmulator:
                 self._write_json_log({"step_result": e.value})
                 if e.value["game_status"] != GameResult.NO_WINNERS:
                     self._write_json_log({"game_result": e.value["game_status"]})
-                    return e.value["game_status"]
+                    return {"game_result": e.value["game_status"], "end_of_turn": True}
             except Exception as e:
                 pprint(e)
-                self.__shared_memory.append({"type": LogEventType.STEP_ERROR, "value": e})
-                self._write_json_log({"step_error": e})
+                self.__shared_memory.append({"type": LogEventType.STEP_ERROR, "value": str(e)})
+                self._write_json_log({"step_error": str(e)})
             self.__print_game_state()
-        return GameResult.NO_WINNERS
+            return {"game_result": GameResult.NO_WINNERS, "end_of_turn": False}
+        else:
+            return {"game_result": GameResult.NO_WINNERS, "end_of_turn": True}
+
+    def __play_cards(self) -> GameResult:
+        while True:
+            card = self.get_card_for_play()
+            card_result = self.play_card(card)
+            if card_result["end_of_turn"]:
+                return card_result["game_result"]
 
     def __discard_cards(self):
         player_state = self.__game.current_player_state
@@ -138,10 +186,11 @@ class GameEmulator:
             print(f"Player state")
             print(player_state)
 
-    def __get_card_for_play(self) -> dict[str, dict[str, Any] | Card] | str:
+    def get_card_for_play(self, preselect_card_id: str = None) -> dict[str, dict[str, Any] | Card] | str:
         def get_card_options(card: Card, agent: Agent) -> dict[str, Any]:
             def get_opponent(card: Card, agent: Agent) -> str:
                 while True:
+
                     opponent = agent.get_opponent(card)
                     if opponent in self.__game.get_player_names():
                         return opponent
@@ -192,9 +241,10 @@ class GameEmulator:
                     options["opponent"] = get_opponent(card, agent)
             return options
 
-        agent = self.__agents[self.__game.current_player_state.name]
+        agent = self.current_agent
         while True:
-            card_id = agent.choice_card_for_play()
+            card_id = preselect_card_id if preselect_card_id\
+                                        else agent.choice_card_for_play()
             try:
                 if card_id == "end":
                     return "end"

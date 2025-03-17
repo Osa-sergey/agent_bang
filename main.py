@@ -6,4 +6,10 @@ if __name__ == '__main__':
 
 
 
+# from src.gui.BangGUI import BangGUI
+#
+# if __name__ == '__main__':
+#     gui = BangGUI('config/config.yaml')
+#
+
 

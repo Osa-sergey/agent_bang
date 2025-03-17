@@ -37,6 +37,10 @@ class Card:
         self.card_id = card_id
         self.card_type = self.__get_card_type()
 
+    def __repr__(self):
+        return str({"card_id": self.card_id.name,
+                "card_type": self.card_type.name})
+
     def __hash__(self):
         return hash((self.card_id, self.card_type))
 
@@ -46,7 +50,7 @@ class Card:
         return False
 
     def __str__(self):
-        return f"card name: {self.card_id.value} card type {self.card_type.name}"
+        return f"Card name: {self.card_id.value} \nCard type: {self.card_type.name}"
 
     def __get_card_type(self) -> CardType:
         match self.card_id:

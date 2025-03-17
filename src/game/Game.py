@@ -3,7 +3,7 @@ import os
 import random
 from collections import defaultdict
 from enum import Enum
-from typing import Optional, Any, Generator, Never, Union
+from typing import Optional, Any, Generator, Never, Union, Callable
 
 from omegaconf import OmegaConf
 
@@ -23,7 +23,11 @@ class GameResult(Enum):
 
 
 class Game:
-    def __init__(self):
+    def __init__(self,
+                 current_player_state_render: Optional[Callable[[Player],None]] = None,
+                 players_game_state_render: Optional[Callable[[dict[str, Any]],None]] = None):
+        self.current_player_state_render = current_player_state_render
+        self.players_game_state_render = players_game_state_render
         self.config = Config().config
         random.seed(self.config.seed)
         check_player_roles(self.config)
@@ -32,9 +36,37 @@ class Game:
         self.__players = self.__create_players()
         self.__players_order = [name for name in self.__players.keys()]
         self.__current_turn = 0
-        self.current_player_state = self.__get_current_player_state()
-        self.players_game_state = self.__get_players_game_state()
+        self._current_player_state = None
+        self._players_game_state = None
         self.__save_init_game_state()
+
+    @property
+    def current_player_state(self):
+        if not self._current_player_state:
+            self._current_player_state = self.__get_current_player_state()
+        if Config().config.gui:
+            self.current_player_state_render(self._current_player_state)
+        return self._current_player_state
+
+    @current_player_state.setter
+    def current_player_state(self, value: Player):
+        if Config().config.gui:
+            self.current_player_state_render(value)
+        self._current_player_state = value
+
+    @property
+    def players_game_state(self):
+        if not self._players_game_state:
+            self._players_game_state = self.__get_players_game_state()
+        if Config().config.gui:
+            self.players_game_state_render(self._players_game_state)
+        return self._players_game_state
+
+    @players_game_state.setter
+    def players_game_state(self, value: dict[str, Any]):
+        if Config().config.gui:
+            self.players_game_state_render(value)
+        self._players_game_state = value
 
     def get_player_names(self):
         return self.__players_order
@@ -42,7 +74,7 @@ class Game:
     def get_player(self, name: str) -> Player:
         return self.__players[name]
 
-    def __get_current_player_state(self):
+    def __get_current_player_state(self) -> Player:
         return self.__players[self.__players_order[self.__current_turn]]
 
     def get_game_log(self):
@@ -52,7 +84,7 @@ class Game:
             "players_order": self.__players_order
         }
 
-    def __get_players_game_state(self):
+    def __get_players_game_state(self) -> dict[str, Any]:
         return {
             "players": {player_name: player_state.get_game_state()
                         for player_name, player_state in self.__players.items()},

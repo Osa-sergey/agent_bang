@@ -1,4 +1,5 @@
 save_path: save/test
+gui: false
 seed: 42
 players_number: 4
 players:

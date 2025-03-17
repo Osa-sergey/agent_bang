@@ -7,7 +7,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from src.game.Card import Card
-from src.emulator.LoggedList import LoggedList
+from src.emulator.LoggedList import LoggedList, SavePath
 from src.game.Player import Player
 from src.game.Utils import GameEncoder
 
@@ -25,7 +25,7 @@ class Agent(ABC):
         self.__agent_config = config["agents"][self.name]
         self.__agent_log_path = os.path.join(config["save_path"], "agents", self.name)
         os.makedirs(self.__agent_log_path)
-        self.__local_memory = LoggedList(self._save_local_memory, "local_memory.jsonl")
+        self.__local_memory = LoggedList(self._save_local_memory, SavePath.LOCAL_MEMORY)
         self.__player = player
         self.__shared_memory = shared_memory
 
