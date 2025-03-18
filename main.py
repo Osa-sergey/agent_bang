@@ -5,7 +5,6 @@ if __name__ == '__main__':
     emulator.play_game()
 
 
-
 # from src.gui.BangGUI import BangGUI
 #
 # if __name__ == '__main__':

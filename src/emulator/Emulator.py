@@ -1,20 +1,25 @@
 import datetime
+import importlib
 import json
 import os.path
+import pkgutil
 from collections import defaultdict
 from enum import Enum
 from pprint import pprint
 from typing import Any, Optional, Callable, Union
 from zoneinfo import ZoneInfo
 
-from src.agent.Agent import Agent, AgentType
+from inflection import underscore, camelize
+
+from src.agent.Agent import Agent
+from src.agent.custom.UserAgent import UserAgent
+import src.agent.custom as agent_module
 from src.emulator.LoggedList import LoggedList, SavePath
 from src.game.Card import Card, CardID, CardActionRequest
 from src.game.Config import Config
 from src.game.Game import Game, GameResult
 from src.game.Player import Player, PlayerActionResponse
 from src.game.Utils import GameEncoder
-from src.agent.UserAgent import UserAgent
 
 
 class LogEventType(Enum):
@@ -54,13 +59,27 @@ class GameEmulator:
         return self.__agents[self.__game.current_player_state.name]
 
     @staticmethod
+    def get_all_loaded_agent_classes() -> dict[str, Any]:
+        classes = {}
+        for _, modname, _ in pkgutil.iter_modules(agent_module.__path__):
+            module = importlib.import_module(f'src.agent.custom.{modname}')
+            classes[underscore(str(modname))] = module
+
+        print("Find agent classes:", classes.keys())
+        return classes
+
+    @staticmethod
     def __init_agents(game: Game, shared_memory: LoggedList, config) -> dict[str, Agent]:
+        agent_classes = GameEmulator.get_all_loaded_agent_classes()
         agents = {}
         for agent_name, agent_config in config.agents.items():
-            match AgentType(agent_config["agent_type"]):
-                case AgentType.USER_AGENT:
-                    player = game.get_player(agent_name)
-                    agents[agent_name] = UserAgent(agent_name, config, player, shared_memory)
+            player = game.get_player(agent_name)
+            agent_type = agent_config["agent_type"]
+            if agent_type in agent_classes.keys():
+                agents[agent_name] = (getattr(agent_classes[agent_type], camelize(agent_type))
+                                      (agent_name, config, player, game, shared_memory))
+            else:
+                raise Exception(f"Agent type: {agent_type} not in loaded custom agent classes: {agent_classes.keys()}")
         return agents
 
     def draw_state(self):
@@ -327,7 +346,8 @@ class GameEmulator:
                 response["action"] = (gatling_response(agent)
                                       if player_state.has_card(Card(CardID.MISS))
                                       else PlayerActionResponse.PASS)
-       
+
+        print(response)
         self.__shared_memory.append(
             {"type": LogEventType.RESPONSE_FOR_CARD,
              "value": f"Reaction for player {player_state.name} for {request['request'].value} is {response["action"].value}"})

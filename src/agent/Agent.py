@@ -8,26 +8,29 @@ from zoneinfo import ZoneInfo
 
 from src.game.Card import Card
 from src.emulator.LoggedList import LoggedList, SavePath
+from src.game.Game import Game
 from src.game.Player import Player
 from src.game.Utils import GameEncoder
-
-
-class AgentType(Enum):
-    USER_AGENT = "user_agent"
 
 
 class Agent(ABC):
     def __init__(self, agent_name: str,
                  config: dict[str, Any],
                  player: Player,
+                 game: Game,
                  shared_memory: LoggedList):
         self.name = agent_name
-        self.__agent_config = config["agents"][self.name]
+        self.agent_config = config["agents"][self.name]
         self.__agent_log_path = os.path.join(config["save_path"], "agents", self.name)
         os.makedirs(self.__agent_log_path)
         self.__local_memory = LoggedList(self._save_local_memory, SavePath.LOCAL_MEMORY)
-        self.__player = player
+        self.player = player # only for read purpose
+        self.game = game # only for read purpose
         self.__shared_memory = shared_memory
+
+    @property
+    def player_hand(self):
+        return self.player.get_state_log()["hand"]
 
     @property
     def local_memory(self):
@@ -44,7 +47,7 @@ class Agent(ABC):
             json.dump(data, f, indent=4, cls=GameEncoder)
 
     def __get_player_current_state(self) -> str:
-        state = self.__player.get_state_log()
+        state = self.player.get_state_log()
         text_state = ""
         return text_state
 

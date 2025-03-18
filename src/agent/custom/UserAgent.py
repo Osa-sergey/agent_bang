@@ -2,6 +2,7 @@ from typing import Any
 
 from src.game.Card import Card
 from src.emulator.LoggedList import LoggedList
+from src.game.Game import Game
 from src.game.Player import Player
 from src.agent.Agent import Agent
 
@@ -10,8 +11,9 @@ class UserAgent(Agent):
     def __init__(self, agent_name: str,
                  config: dict[str, Any],
                  player: Player,
+                 game: Game,
                  shared_memory: LoggedList):
-        super().__init__(agent_name, config, player, shared_memory)
+        super().__init__(agent_name, config, player, game, shared_memory)
 
     def choice_card_for_play(self) -> str:
         return input(f"Enter the name of a card to play or end to end a turn: ").strip()

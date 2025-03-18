@@ -3,7 +3,7 @@ from typing import Any
 
 import dearpygui.dearpygui as dpg
 
-from src.agent.UserAgent import UserAgent
+from src.agent.custom.UserAgent import UserAgent
 from src.emulator.Emulator import GameEmulator
 from src.game.Player import Player
 from src.game.Utils import GameEncoder
