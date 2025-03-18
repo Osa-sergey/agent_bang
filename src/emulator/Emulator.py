@@ -85,14 +85,15 @@ class GameEmulator:
         else:
             self.start_of_turn()
 
-    def __one_player_game_circle(self):
+    def __one_player_game_circle(self) -> GameResult:
         self.start_of_turn()
         game_result = self.__play_cards()
         if game_result != GameResult.NO_WINNERS:
             print("===" * 15, "END OF GAME", "===" * 15)
             print(game_result.name)
-            return
+            return game_result
         self.end_of_turn()
+        return game_result
 
     def end_of_turn(self):
         self.__discard_cards()
@@ -100,7 +101,9 @@ class GameEmulator:
 
     def auto_play(self):
         while True:
-            self.__one_player_game_circle()
+            game_result = self.__one_player_game_circle()
+            if game_result != GameResult.NO_WINNERS:
+                return
 
             agent = self.current_agent
             if isinstance(agent, UserAgent):
@@ -108,7 +111,9 @@ class GameEmulator:
 
     def play_game(self):
         while True:
-            self.__one_player_game_circle()
+            game_result = self.__one_player_game_circle()
+            if game_result != GameResult.NO_WINNERS:
+                return
 
     def _write_json_log(self, data: dict[str, Any], file_name: str = "game_log.jsonl"):
         log_file = os.path.join(self.__config.config.save_path, file_name)
