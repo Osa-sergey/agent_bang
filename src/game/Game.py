@@ -132,7 +132,7 @@ class Game:
                     else:
                         self.current_player_state.decrease_health()
                         self.__beer_save()
-                        outliers = self.__update_live_list()
+                        outliers |= self.__update_live_list()
             case CardID.GATLING:
                 opponents = [player for player in self.__players_order
                              if player != self.__players_order[self.__current_turn]]
@@ -146,7 +146,7 @@ class Game:
                     else:
                         self.current_player_state.decrease_health()
                         self.__beer_save()
-                        outliers = self.__update_live_list()
+                        outliers |= self.__update_live_list()
             case CardID.PANIC:
                 opponent = options.get("opponent", "default")
                 action_type = options.get("action_type", "from_hand")
@@ -217,7 +217,7 @@ class Game:
                 else:
                     self.current_player_state.decrease_health()
                     self.__beer_save()
-                    outliers = self.__update_live_list()
+                    outliers |= self.__update_live_list()
 
         self.current_player_state = self.__get_current_player_state()
         self.current_player_state.discard_cards_from_hand(card)
@@ -266,7 +266,7 @@ class Game:
 
     def __make_post_death_events(self, outliers: Union[dict[str, Role], dict[Never]]):
         for outlier_role in outliers.values():
-            match outlier_role.value:
+            match outlier_role:
                 case Role.BANDIT:
                     self.__get_current_player_state().draw_cards(3)
                 case Role.SHERIFF_ASSISTANT:

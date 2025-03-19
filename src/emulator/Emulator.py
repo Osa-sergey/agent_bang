@@ -93,11 +93,11 @@ class GameEmulator:
         _ = self.__game.players_game_state
         player_state = self.__game.current_player_state
         print("===" * 15, f"Turn player: {player_state.name}", "===" * 15)
-        self._write_json_log({"turn_player": player_state.name})
-        self._write_json_log({"current_player_state": player_state.get_state_log()})
+        self._write_json_log({"type": "turn_player", "value": player_state.name})
+        self._write_json_log({"type": "current_player_state", "value": player_state.get_state_log()})
         self.__shared_memory.append({"type": LogEventType.TURN_PLAYER, "value": player_state.name})
         self.__game.start_of_turn()
-        self._write_json_log({"current_player_state_after_draw": player_state.get_state_log()})
+        self._write_json_log({"type": "current_player_state_after_draw", "value": player_state.get_state_log()})
         self.__print_game_state()
 
     def gui_game(self):
@@ -148,14 +148,14 @@ class GameEmulator:
     def __print_game_state(self):
         print("===" * 15, "All player", "===" * 15)
         self.__shared_memory.append({"type": LogEventType.PLAYERS_GAME_STATE, "value": self.__game.players_game_state})
-        self._write_json_log({"game_state": self.__game.get_game_log()})
+        self._write_json_log({"type": "game_state", "value": self.__game.get_game_log()})
         pprint(self.__game.players_game_state)
         print("===" * 15, "Current player", "===" * 15)
         print(self.__game.current_player_state)
 
     def play_card(self, card:  dict[str, dict[str, Any] | Card] | str) -> dict[str, Union[GameResult, bool]]:
         self.__shared_memory.append({"type": LogEventType.PLAY_CARD, "value": card})
-        self._write_json_log({"play_card": card})
+        self._write_json_log({"type": "play_card", "value": card})
         if card != "end":
             card, options = card["card"], card["options"]
             generator_play_card = self.__game.play_card(card, options=options)
@@ -168,14 +168,14 @@ class GameEmulator:
                 print("Step result")
                 pprint(e.value)
                 self.__shared_memory.append({"type": LogEventType.STEP_RESULT, "value": e.value})
-                self._write_json_log({"step_result": e.value})
+                self._write_json_log({"type": "step_result", "value": e.value})
                 if e.value["game_status"] != GameResult.NO_WINNERS:
-                    self._write_json_log({"game_result": e.value["game_status"]})
+                    self._write_json_log({"type": "game_result", "value": e.value["game_status"]})
                     return {"game_result": e.value["game_status"], "end_of_turn": True}
             except Exception as e:
                 pprint(e)
                 self.__shared_memory.append({"type": LogEventType.STEP_ERROR, "value": str(e)})
-                self._write_json_log({"step_error": str(e)})
+                self._write_json_log({"type": "step_error", "value": str(e)})
             self.__print_game_state()
             return {"game_result": GameResult.NO_WINNERS, "end_of_turn": False}
         else:
@@ -197,7 +197,7 @@ class GameEmulator:
             print(player_state)
             self.__shared_memory.append({"type": LogEventType.NEED_DISCARD_CARDS,
                                "value": f"Player {player_state.name} need to discard {need_to_discard} cards"})
-            self._write_json_log({"need_to_discard": need_to_discard})
+            self._write_json_log({"type": "need_to_discard", "value": need_to_discard})
             agent = self.__agents[player_state.name]
             while True:
                 try:
@@ -206,7 +206,7 @@ class GameEmulator:
                 except Exception as e:
                     agent.react_to_discard_error(str(e))
 
-            self._write_json_log({"discarded_cards": cards_for_discard})
+            self._write_json_log({"type": "discarded_cards", "value": cards_for_discard})
             player_state.discard_cards_from_hand(cards_for_discard)
             print("===" * 30)
             print(f"Player state after discard cards")
@@ -228,8 +228,9 @@ class GameEmulator:
                         self.__shared_memory.append(
                             {"type": LogEventType.DRAFT_PLAY_CARD_OPTION_FAIL,
                              "value": f"That player {opponent} doesn't exist"})
-                        self._write_json_log({"draft_play_card_option_fail": {"fail": "That player doesn't exist",
-                                                                              "value": opponent}})
+                        self._write_json_log({"type": "draft_play_card_option_fail",
+                                                "value": {"fail": "That player doesn't exist",
+                                                         "value": opponent}})
 
             def get_action_type(card: Card, agent: Agent) -> str:
                 while True:
@@ -241,8 +242,8 @@ class GameEmulator:
                         self.__shared_memory.append(
                             {"type": LogEventType.DRAFT_PLAY_CARD_OPTION_FAIL,
                              "value": f"Action_type {action_type} not allowed. Allowable options (from_hand, from_play)"})
-                        self._write_json_log({"draft_play_card_option_fail": {"fail": "Action_type not allowed",
-                                                                              "value": action_type}})
+                        self._write_json_log({"type": "draft_play_card_option_fail", "value": {"fail": "Action_type not allowed",
+                                                                                                "value": action_type}})
                                                    
 
             def get_card_for_steal(card: Card, agent: Agent) -> str:
@@ -256,8 +257,8 @@ class GameEmulator:
                         self.__shared_memory.append(
                             {"type": LogEventType.DRAFT_PLAY_CARD_OPTION_FAIL,
                              "value": f"Card {card_name} doesn't exist in the game"})
-                        self._write_json_log({"draft_play_card_option_fail": {"fail": "Card doesn't exist in the game",
-                                                                              "value": card_name}})
+                        self._write_json_log({"type": "draft_play_card_option_fail", "value": {"fail": "Card doesn't exist in the game",
+                                                                                                "value": card_name}})
 
             options = {}
             match card.card_id:
@@ -285,8 +286,8 @@ class GameEmulator:
                 self.__shared_memory.append(
                     {"type": LogEventType.DRAFT_PLAY_CARD_FAIL,
                      "value": f"Card {card_id} doesn't exist in the game"})
-                self._write_json_log({"draft_play_card_fail": {"fail": "Card doesn't exist in the game",
-                                                               "value": card_id}})
+                self._write_json_log({"type": "draft_play_card_fail", "value": {"fail": "Card doesn't exist in the game",
+                                                                                "value": card_id}})
 
     def __get_opponent_response_for_card(self, request: dict[str, Any]) -> dict[str, PlayerActionResponse]:
         def indians_response(agent: Agent) -> PlayerActionResponse:
@@ -299,9 +300,9 @@ class GameEmulator:
                     self.__shared_memory.append(
                         {"type": LogEventType.RESPONSE_FOR_CARD_FAIL,
                          "value": f"The response {response} is not acceptable. Acceptable options (bang, pass)"})
-                    self._write_json_log({"response_for_card_fail": {"player": agent.name,
-                                                                     "fail": "The response is not acceptable",
-                                                                     "value": response}})
+                    self._write_json_log({"type": "response_for_card_fail", "value": {"player": agent.name,
+                                                                                        "fail": "The response is not acceptable",
+                                                                                        "value": response}})
 
         def bang_response(agent: Agent) -> PlayerActionResponse:
             while True:
@@ -313,9 +314,9 @@ class GameEmulator:
                     self.__shared_memory.append(
                         {"type": LogEventType.RESPONSE_FOR_CARD_FAIL,
                          "value": f"The response {response} is not acceptable. Acceptable options (miss, pass)"})
-                    self._write_json_log({"response_for_card_fail": {"player": agent.name,
-                                                                     "fail": "The response is not acceptable",
-                                                                     "value": response}})
+                    self._write_json_log({"type": "response_for_card_fail", "value": {"player": agent.name,
+                                                                                        "fail": "The response is not acceptable",
+                                                                                        "value": response}})
 
         def gatling_response(agent: Agent) -> PlayerActionResponse:
             while True:
@@ -327,9 +328,9 @@ class GameEmulator:
                     self.__shared_memory.append(
                         {"type": LogEventType.RESPONSE_FOR_CARD_FAIL,
                          "value": f"The response {response} is not acceptable. Acceptable options (miss, pass)"})
-                    self._write_json_log({"response_for_card_fail": {"player": agent.name,
-                                                                     "fail": "The response is not acceptable",
-                                                                     "value": response}})
+                    self._write_json_log({"type": "response_for_card_fail", "value": {"player": agent.name,
+                                                                                         "fail": "The response is not acceptable",
+                                                                                         "value": response}})
 
         response = {}
         opponent = request['opponent']
@@ -363,9 +364,9 @@ class GameEmulator:
         self.__shared_memory.append(
             {"type": LogEventType.RESPONSE_FOR_CARD,
              "value": f"Reaction for player {player_state.name} for {request['request'].value} is {response["action"].value}"})
-        self._write_json_log({"response_for_card": {"user": player_state.name,
-                                                    "reaction": response["action"].value,
-                                                    "is_auto_response": is_auto_response}})
+        self._write_json_log({"type": "response_for_card", "value": {"user": player_state.name,
+                                                                        "reaction": response["action"].value,
+                                                                        "is_auto_response": is_auto_response}})
         return response
 
     def __get_cards_for_discard(self, num_discard_cards: int, player_state: Player, agent: Agent) -> list[Card]:
@@ -398,6 +399,6 @@ class GameEmulator:
                     errors.append(f"Cards {k.card_id.value} is less than {v}. You can't drop that many cards")
 
         if errors:
-            self._write_json_log({"cards_for_discard_errors": errors})
+            self._write_json_log({"type": "cards_for_discard_errors", "value": errors})
             raise Exception(errors)
         return cards_for_discard
