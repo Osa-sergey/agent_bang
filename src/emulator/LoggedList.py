@@ -8,8 +8,8 @@ from src.game.Utils import GameEncoder
 
 
 class SavePath(Enum):
-    SHARED_MEMORY = "shared_memory_log.jsonl"
-    LOCAL_MEMORY = "local_memory.jsonl"
+    SHARED_MEMORY = "shared_memory_log.json"
+    LOCAL_MEMORY = "local_memory.json"
 
 class LoggedList(list):
     def __init__(self,

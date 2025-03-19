@@ -1,4 +1,5 @@
-save_path: save/test
+exp_name: test1
+save_path: save/${exp_name}
 gui: false
 seed: 42
 players_number: 4

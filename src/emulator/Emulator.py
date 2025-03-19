@@ -20,6 +20,7 @@ from src.game.Config import Config
 from src.game.Game import Game, GameResult
 from src.game.Player import Player, PlayerActionResponse
 from src.game.Utils import GameEncoder
+from src.observ.GameExperimentLogger import GameExperimentLogger
 
 
 class LogEventType(Enum):
@@ -44,6 +45,8 @@ class GameEmulator:
                  use_gui: bool = False):
         self.__config = Config()
         self.__config.init(config_path)
+        self.__exp_logger = GameExperimentLogger()
+        self.__exp_logger.start_run()
         self.use_gui = use_gui
         Config().config.gui = self.use_gui
         self.__game = Game(current_player_state_render, players_game_state_render)
@@ -132,9 +135,10 @@ class GameEmulator:
         while True:
             game_result = self.__one_player_game_circle()
             if game_result != GameResult.NO_WINNERS:
-                return
+                break
+        self.__exp_logger.end_run()
 
-    def _write_json_log(self, data: dict[str, Any], file_name: str = "game_log.jsonl"):
+    def _write_json_log(self, data: dict[str, Any], file_name: str = "game_log.json"):
         log_file = os.path.join(self.__config.config.save_path, file_name)
         with open(log_file, "a", encoding="utf-8") as f:
             data["dttm"] = datetime.datetime.now(ZoneInfo("Europe/Moscow"))

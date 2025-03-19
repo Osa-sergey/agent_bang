@@ -307,7 +307,6 @@ class Game:
             raise Exception('Fill in the path to save the game')
         if os.path.exists(path_to_save) and os.listdir(path_to_save):
             raise Exception('A save folder with this name already exists')
-        os.makedirs(path_to_save, exist_ok=True)
 
         game_state = {
             "config": OmegaConf.to_container(self.config, resolve=True),
