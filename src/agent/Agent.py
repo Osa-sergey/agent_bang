@@ -44,12 +44,8 @@ class Agent(ABC):
         data["dttm"] = datetime.datetime.now(ZoneInfo("Europe/Moscow"))
         log_file = os.path.join(self.__agent_log_path, file_name)
         with open(log_file, "a", encoding="utf-8") as f:
-            json.dump(data, f, indent=4, cls=GameEncoder)
-
-    def __get_player_current_state(self) -> str:
-        state = self.player.get_state_log()
-        text_state = ""
-        return text_state
+            json.dump(data, f, cls=GameEncoder)
+            f.write('\n')
 
     @abstractmethod
     def choice_card_for_play(self) -> str:

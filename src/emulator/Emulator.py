@@ -139,10 +139,11 @@ class GameEmulator:
         self.__exp_logger.end_run()
 
     def _write_json_log(self, data: dict[str, Any], file_name: str = "game_log.json"):
+        data["dttm"] = datetime.datetime.now(ZoneInfo("Europe/Moscow"))
         log_file = os.path.join(self.__config.config.save_path, file_name)
         with open(log_file, "a", encoding="utf-8") as f:
-            data["dttm"] = datetime.datetime.now(ZoneInfo("Europe/Moscow"))
-            json.dump(data, f, indent=4, cls=GameEncoder)
+            json.dump(data, f, cls=GameEncoder)
+            f.write('\n')
 
     def __print_game_state(self):
         print("===" * 15, "All player", "===" * 15)
@@ -337,26 +338,34 @@ class GameEmulator:
         agent = self.__agents[opponent]
 
         print("===" * 15, f"Reaction for player: {player_state.name}", "===" * 15)
+        is_auto_response = False
         match request['request']:
             case CardActionRequest.RESPONSE_TO_INDIANS:
-                response["action"] = (indians_response(agent)
-                                      if player_state.has_card(Card(CardID.BANG))
-                                      else PlayerActionResponse.PASS)
+                if player_state.has_card(Card(CardID.BANG)):
+                    response["action"] = indians_response(agent)
+                else:
+                    response["action"] = PlayerActionResponse.PASS
+                    is_auto_response = True
             case CardActionRequest.RESPONSE_TO_BANG:
-                response["action"] = (bang_response(agent)
-                                      if player_state.has_card(Card(CardID.MISS))
-                                      else PlayerActionResponse.PASS)
+                if player_state.has_card(Card(CardID.MISS)):
+                    response["action"] = bang_response(agent)
+                else:
+                    response["action"] = PlayerActionResponse.PASS
+                    is_auto_response = True
             case CardActionRequest.RESPONSE_TO_GATLING:
-                response["action"] = (gatling_response(agent)
-                                      if player_state.has_card(Card(CardID.MISS))
-                                      else PlayerActionResponse.PASS)
+                if player_state.has_card(Card(CardID.MISS)):
+                    response["action"] = gatling_response(agent)
+                else:
+                    response["action"] = PlayerActionResponse.PASS
+                    is_auto_response = True
 
         print(response)
         self.__shared_memory.append(
             {"type": LogEventType.RESPONSE_FOR_CARD,
              "value": f"Reaction for player {player_state.name} for {request['request'].value} is {response["action"].value}"})
         self._write_json_log({"response_for_card": {"user": player_state.name,
-                                                    "reaction": response["action"].value}})
+                                                    "reaction": response["action"].value,
+                                                    "is_auto_response": is_auto_response}})
         return response
 
     def __get_cards_for_discard(self, num_discard_cards: int, player_state: Player, agent: Agent) -> list[Card]:
