@@ -27,12 +27,16 @@ players:
 agents:
   # name from players
   serg:
+    agent_id: base
     agent_type: dummy_agent # user_agent dummy_agent
   andy:
+    agent_id: base
     agent_type: dummy_agent
   anna:
+    agent_id: base
     agent_type: dummy_agent
   igor:
+    agent_id: base
     agent_type: dummy_agent
 
 cards: # base card set
