@@ -1,4 +1,4 @@
-exp_name: test8
+exp_name: test9
 save_path: save/${exp_name}
 gui: false
 seed: 42

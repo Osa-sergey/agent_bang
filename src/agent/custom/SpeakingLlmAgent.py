@@ -234,6 +234,9 @@ Reply in JSON format of the following structure:
   "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
    team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the name of a card in lowercase to play or end to end a turn>
+  "users_role": <Based on your reasoning, generate a list of assumed role for each opponent. 
+  Give the answer in the form of a dictionary in which the key is the opponent's name and the value is the expected role.
+  Try to understand what each opponent's role is. Valid options [Sheriff, Renegade, Bandits, Bandits]>
 }
                 """
         return self.ask_llm(prompt)['result']
