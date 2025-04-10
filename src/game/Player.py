@@ -75,6 +75,7 @@ class Player:
                 if self.__weapon != card:
                     raise Exception(f"The player does not have such a weapon {card} in the game")
                 self.__weapon = "default"
+                self.__weapon_range = 1
             case CardType.EFFECT:
                 if card not in self.__effects:
                     raise Exception(f"The player does not have such a effect {card} in the game")
