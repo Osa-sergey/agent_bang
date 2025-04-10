@@ -2,7 +2,6 @@ import json
 from typing import Any, Union, Dict
 import re
 
-from jinja2.runtime import new_context
 from openai import OpenAI
 
 from src.agent.Agent import Agent
@@ -387,7 +386,7 @@ Reply in JSON format of the following structure:
         prompt = f"""
 Your current cards and other parameters {cur_state}.
 Your last answer in which you had to choose a list of cards to discard from your hand was incorrect.
-Look at the list of errors and based on it think about what exactly you did wrong.
+Look at the list of errors and based on it think about what exactly you did wrong. Errors: {errors}
 Keep in mind that the correct answer is a json structure with a result field in which the list of cards
 to be discarded is listed in a space separated line
 Look carefully at the mistake you made and think about how you could
