@@ -5,6 +5,7 @@ import re
 from openai import OpenAI
 
 from src.agent.Agent import Agent
+from src.emulator.Emulator import LogEventType
 from src.emulator.LoggedList import LoggedList
 from src.game.Card import Card
 from src.game.Game import Game
@@ -12,7 +13,7 @@ from src.game.Player import Player
 from src.game.Utils import GameEncoder
 
 
-class BaseLlmAgent(Agent):
+class SpeakingLlmAgent(Agent):
     def __init__(self, agent_name: str,
                  config: dict[str, Any],
                  player: Player,
@@ -205,6 +206,9 @@ Clarification: Andy (Renegade) is out. Since all Bandits and Renegade are elimin
             try:
                 json_object = json.loads(json_str)
                 print("Extracted JSON object:", json_object)
+                if json_object.get("say_to_all"):
+                    self.shared_memory.append({"type": LogEventType.PLAYER_SAY,
+                                               "value": {"player": self.name, "say": json_object.get("say_to_all")}})
                 return json_object
             except json.JSONDecodeError as e:
                 print(f"JSON parsing error: {e}")
@@ -227,6 +231,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which card to play now>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the name of a card in lowercase to play or end to end a turn>
 }
                 """
@@ -246,6 +252,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which opponent to choose now>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the name of opponent>
 }
                 """
@@ -266,6 +274,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which action_type to choose now>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the name of action_type from to options (from_hand, from_play)>
 }
                 """
@@ -288,6 +298,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
  “your_reflection": <Your thoughts on which card to get from opponent>,
+ "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
  “result": <Enter the name of card in lowercase to get from opponent>
 }
                """
@@ -306,6 +318,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which option to choose>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the respond from to options (bang, pass)>
 }
                 """
@@ -325,6 +339,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which option to choose>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the respond from to options (miss, pass)>
 }
                 """
@@ -344,6 +360,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which option to choose>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the respond from to options (miss, pass)>
 }
                 """
@@ -367,11 +385,13 @@ Reply in JSON format of the following structure:
     """ + """
     {
       “your_reflection": <Your thoughts on which cards to choose for discard>,
+      "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+        team up with someone to win the game. If there is nothing to say, do not add this field>
       “result": <Enter """ + str(num_cards) + """ of the card names, separated by spaces>
     }
     example of output:
     {
-        "your_reflection": "If I need to discard 2 cards and in my hand [bang, miss, fargo, panic] I need to chose less useful  for me"
+        "your_reflection": "If I need to discard 2 cards and in my hand [bang, miss, fargo, panic] I need to chose less useful for me"
         “result": "bang miss"
     }
                     """

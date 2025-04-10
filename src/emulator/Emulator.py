@@ -24,6 +24,7 @@ from src.observ.GameExperimentLogger import GameExperimentLogger
 
 
 class LogEventType(Enum):
+    PLAYER_SAY = 11
     NEED_DISCARD_CARDS = 10
     STEP_ERROR = 9
     STEP_RESULT = 8
