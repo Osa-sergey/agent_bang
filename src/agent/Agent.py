@@ -27,6 +27,7 @@ class Agent(ABC):
         self.player = player # only for read purpose
         self.game = game # only for read purpose
         self.__shared_memory = shared_memory
+        self.last_shared_memory_index = len(shared_memory)
 
     @property
     def player_hand(self):
@@ -56,11 +57,11 @@ class Agent(ABC):
         pass
 
     @abstractmethod
-    def get_action_type(self, card: Card) -> str:
+    def get_action_type(self, card: Card, options: dict) -> str:
         pass
 
     @abstractmethod
-    def get_card_for_steal(self, card: Card) -> str:
+    def get_card_for_steal(self, card: Card, options: dict) -> str:
         pass
 
     @abstractmethod

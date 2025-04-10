@@ -232,9 +232,9 @@ class GameEmulator:
                                                 "value": {"fail": "That player doesn't exist",
                                                          "value": opponent}})
 
-            def get_action_type(card: Card, agent: Agent) -> str:
+            def get_action_type(card: Card, options: dict, agent: Agent) -> str:
                 while True:
-                    action_type = agent.get_action_type(card)
+                    action_type = agent.get_action_type(card, options)
                     if action_type in ("from_hand", "from_play"):
                         return action_type
                     else:
@@ -246,9 +246,9 @@ class GameEmulator:
                                                                                                 "value": action_type}})
                                                    
 
-            def get_card_for_steal(card: Card, agent: Agent) -> str:
+            def get_card_for_steal(card: Card, options: dict, agent: Agent) -> str:
                 while True:
-                    card_name = agent.get_card_for_steal(card)
+                    card_name = agent.get_card_for_steal(card, options)
                     try:
                         Card(CardID(card_name))
                         return card_name
@@ -264,9 +264,9 @@ class GameEmulator:
             match card.card_id:
                 case CardID.PANIC | CardID.HOTTIE:
                     options["opponent"] = get_opponent(card, agent)
-                    options["action_type"] = get_action_type(card, agent)
+                    options["action_type"] = get_action_type(card, options, agent)
                     if options["action_type"] == "from_play":
-                        options["card"] = get_card_for_steal(card, agent)
+                        options["card"] = get_card_for_steal(card, options, agent)
                 case CardID.BANG:
                     options["opponent"] = get_opponent(card, agent)
             return options

@@ -49,11 +49,11 @@ class DummyAgent(Agent):
             options = [all_players[my_index - 1], all_players[my_index + 1]]
         return random.choice(options)
 
-    def get_action_type(self, card: Card) -> str:
+    def get_action_type(self, card: Card, options: dict) -> str:
         sleep(self.sleep_delay)
         return "from_hand"
 
-    def get_card_for_steal(self, card: Card) -> str:
+    def get_card_for_steal(self, card: Card, options: dict) -> str:
         sleep(self.sleep_delay)
         return input(f"Enter the name of the card: ").strip().lower()
 

@@ -1,4 +1,4 @@
-exp_name: test1
+exp_name: test3
 save_path: save/${exp_name}
 gui: false
 seed: 42
@@ -28,7 +28,7 @@ agents:
   # name from players
   serg:
     agent_id: base
-    agent_type: dummy_agent # user_agent dummy_agent
+    agent_type: base_llm_agent # user_agent dummy_agent base_llm_agent
   andy:
     agent_id: base
     agent_type: dummy_agent

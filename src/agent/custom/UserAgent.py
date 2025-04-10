@@ -21,10 +21,10 @@ class UserAgent(Agent):
     def get_opponent(self, card: Card) -> str:
         return input(f"Enter your opponent's name: ").strip().lower()
 
-    def get_action_type(self, card: Card) -> str:
+    def get_action_type(self, card: Card, options: dict) -> str:
         return input(f"Enter where the card should be from (from_hand, from_play): ").strip().lower()
 
-    def get_card_for_steal(self, card: Card) -> str:
+    def get_card_for_steal(self, card: Card, options: dict) -> str:
         return input(f"Enter the name of the card: ").strip().lower()
 
     def get_indians_response(self) -> str:
