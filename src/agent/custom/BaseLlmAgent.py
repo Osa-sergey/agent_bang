@@ -172,7 +172,7 @@ Clarification: Andy (Renegade) is out. Since all Bandits and Renegade are elimin
         self.last_shared_memory_index = len(self.shared_memory)
         return last_memories
 
-    def ask_llm(self, prompt: str) -> Union[Dict[str, Any], str, None]:
+    def ask_llm(self, prompt: str) -> Union[Dict[str, Any], str]:
         print("Prompt:", prompt)
         self.local_memory.append({"content": prompt})
         if len(self.chat_context) > 40:
@@ -233,10 +233,8 @@ Reply in JSON format of the following structure:
         return self.ask_llm(prompt)['result']
 
     def get_opponent(self, card: Card) -> str:
-        last_memories = self.get_last_memories()
         opponents = [player for player in self.game.get_player_names() if player != self.name]
         prompt = f"""
-Events since the last time you acted: {last_memories}.
 For card: {card}
 and opponents: {opponents}
 Choose the best opponent to apply this card to. To do this,
@@ -252,10 +250,8 @@ Reply in JSON format of the following structure:
         return self.ask_llm(prompt)['result']
 
     def get_action_type(self, card: Card, options: dict) -> str:
-        last_memories = self.get_last_memories()
         opponent = options["opponent"]
         prompt = f"""
-Events since the last time you acted: {last_memories}.
 For card: {card}
 and opponent: {opponent}
 Choose the best action_type from to options (from_hand, from_play) to apply this card to. 
@@ -274,9 +270,7 @@ Reply in JSON format of the following structure:
     def get_card_for_steal(self, card: Card, options: dict) -> str:
         opponent = options["opponent"]
         action_type = options["action_type"]
-        last_memories = self.get_last_memories()
         prompt = f"""
-Events since the last time you acted: {last_memories}.
 For card: {card}
 and opponent: {opponent}
 and action_type: {action_type}
@@ -351,10 +345,8 @@ Reply in JSON format of the following structure:
 
     def get_card_for_discard(self, num_cards: int) -> str:
         if self.errors < 3:
-            last_memories = self.get_last_memories()
             cur_state = self.__get_player_current_state()
             prompt = f"""
-    Events since the last time you acted: {last_memories}.
     Your current cards and other parameters {cur_state}.
     Now you need to choose which cards from your hand to discard.
     The total number of cards to be discarded is {num_cards}.

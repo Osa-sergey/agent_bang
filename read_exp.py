@@ -23,4 +23,4 @@ def get_jsonl(path):
     return data
 
 if __name__ == "__main__":
-    read_game(os.path.join('save', 'test4', '49b1149a-10c9-4d02-b9c1-19f25661c57b'))
+    read_game(os.path.join('save', 'test8', '4a808750-5193-4ba4-9403-07e450ef9ca4'))

@@ -13,7 +13,7 @@ from src.game.Player import Player
 from src.game.Utils import GameEncoder
 
 
-class SpeakingLlmAgent(Agent):
+class CoopLlmAgent(Agent):
     def __init__(self, agent_name: str,
                  config: dict[str, Any],
                  player: Player,
@@ -29,11 +29,12 @@ class SpeakingLlmAgent(Agent):
 Overview
 Bang! is a Western-style card game for 4-7 players. Players are assigned roles with unique objectives:
 For 4 players roles [Sheriff, Renegade, Bandits, Bandits]
+For 5 players roles [Sheriff, Renegade, Bandits, Bandits, Helper]
 Role win strategy:
 Sheriff: destroy all Bandits and the Renegade.
 Bandits: kill the Sheriff.
 Helpers: protect the Sheriff.
-Renegade: to be the last survivor.
+Renegade: to be the last survivor. Firstly kill all bandits and next kill sheriff and helpers.
 Preparation
 Players get roles (hidden, except for the Sheriff) and characters.
 Each player receives an amount of health (ammo) equal to the character's health and starting cards (based on the number of health).
@@ -229,8 +230,15 @@ Clarification: Andy (Renegade) is out. Since all Bandits and Renegade are elimin
         prompt = f"""
 Events since the last time you acted: {last_memories}.
 Your current cards and other parameters {cur_state}.
+If you can cooperate with somthing, do this for your win. Use your knowledge of other players' roles to do this.
+Carefully analyze what your opponents say in order to coordinate your actions with your friends, or on the contrary,
+to prevent your opponents from achieving their goals. Also to do this, analyze the state of your friends and help them if possible,
+for example, by removing effect cards from a common enemy or supporting an friend's attack.
+Be careful, your assumptions about your friends may be false. Take special care to keep your role a secret from your enemies for as long as possible  
+
 Choose name of a card to play or end to end a turn.
-To do this, consider the distance to the player, the effect of the card,
+To do this, consider the distance to the player, the effec
+t of the card,
 and your assumptions about the player's role and how it relates to your win condition.  
 Reply in JSON format of the following structure:
 """ + """
@@ -241,7 +249,7 @@ Reply in JSON format of the following structure:
   “result": <Enter the name of a card in lowercase to play or end to end a turn>
   "users_role": <Based on your reasoning, generate a list of assumed role for each opponent. 
   Give the answer in the form of a dictionary in which the key is the opponent's name and the value is the expected role.
-  Try to understand what each opponent's role is. Valid options [Sheriff, Renegade, Bandits, Bandits]>
+  Try to understand what each opponent's role is. Valid options [Sheriff, Renegade, Bandits, Helper]>
 }
                 """
         return self.ask_llm(prompt)['result']
