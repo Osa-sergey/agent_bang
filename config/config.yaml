@@ -1,4 +1,4 @@
-exp_name: test14
+exp_name: choice_coopmulti_with_prompt_drop
 save_path: save/${exp_name}
 gui: false
 seed: 42
@@ -33,19 +33,19 @@ agents:
   # name from players
   serg:
     agent_id: base
-    agent_type: base_multi_llm_agent # user_agent dummy_agent base_llm_agent speaking_llm_agent, coop_llm_agent, base_multi_llm_agent
+    agent_type: choice_coop_multi_llm_agent # user_agent dummy_agent base_llm_agent speaking_llm_agent, coop_llm_agent, base_multi_llm_agent coop_multi_llm_agent choice_coop_multi_llm_agent
   andy:
     agent_id: base
-    agent_type: base_multi_llm_agent
+    agent_type: choice_coop_multi_llm_agent
   anna:
     agent_id: base
-    agent_type: base_multi_llm_agent
+    agent_type: choice_coop_multi_llm_agent
   igor:
     agent_id: base
-    agent_type: base_multi_llm_agent
+    agent_type: choice_coop_multi_llm_agent
   john:
     agent_id: base
-    agent_type: base_multi_llm_agent
+    agent_type: choice_coop_multi_llm_agent
 
 cards: # base card set
   bang: 25
