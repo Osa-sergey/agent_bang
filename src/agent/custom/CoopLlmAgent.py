@@ -177,7 +177,7 @@ Clarification: Andy (Renegade) is out. Since all Bandits and Renegade are elimin
     def ask_llm(self, prompt: str) -> Union[Dict[str, Any], str]:
         print("Prompt:", prompt)
         self.local_memory.append({"content": prompt})
-        if len(self.chat_context) > 40:
+        if len(self.chat_context) > 20:
             old_context = self.chat_context[-20:]
             self.chat_context = [
                 {"role": "system", "content": self.system_prompt}

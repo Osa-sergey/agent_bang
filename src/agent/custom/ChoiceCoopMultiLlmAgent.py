@@ -327,8 +327,9 @@ Reply in JSON format of the following structure:
 
         for i, agent in enumerate(agents):
             system_prompt = [{"role": "system", "content": self.agents[agent]['system_prompt']}]
-            if len(self.chat_context) > 40:
+            if len(self.chat_context) > 20:
                 self.chat_context = self.chat_context[-20:]
+                prompt_position -= 1
 
             if state and i == len(agents) - 1:
                 self.local_memory.append({"content": prompt})
