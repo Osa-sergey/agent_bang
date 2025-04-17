@@ -310,15 +310,11 @@ Summarize the information received and answer the question as correctly as possi
                 self.local_memory.append({"content": answer, "agent": agent})
             self.chat_context.append({"role": "assistant", "content": answer})
         self.chat_context.pop(prompt_position) # Удаляем сам запрос, чтобы он не сбивал формат вывода модели
-        json_pattern = r'\{(?:[^{}]|\{[^{}]*\})*\}'
-        match = re.search(json_pattern, answer)
-
-        if match:
-            json_str = match.group(0)
-            try:
-                json_object = json.loads(json_str)
+        json_objects = self.extract_json_objects(answer)
+        if json_objects:
+            for json_object in json_objects:
                 print("Extracted JSON object:", json_object)
-                if  json_object.get("users_role"):
+                if json_object.get("users_role"):
                     self.local_memory.append({"content": answer, "users_role": json_object.get("users_role")})
                 else:
                     self.local_memory.append({"content": answer})
@@ -326,15 +322,28 @@ Summarize the information received and answer the question as correctly as possi
                     self.shared_memory.append({"type": LogEventType.PLAYER_SAY,
                                                "value": {"player": self.name, "say": json_object.get("say_to_all")}})
                 return json_object
-            except json.JSONDecodeError as e:
-                self.local_memory.append({"content": answer})
-                print(f"JSON parsing error: {e}")
-                return answer
         else:
             self.local_memory.append({"content": answer})
             print("No JSON object found in the response")
             return answer
 
+
+    def extract_json_objects(self, row_text: str):
+        pattern = r'```json\n(.*?)\n```'
+        matches = re.finditer(pattern, row_text, re.DOTALL)
+        json_objects = []
+
+        for match in matches:
+            json_str = match.group(1)
+            try:
+                json_object = json.loads(json_str)
+                json_objects.append(json_object)
+            except json.JSONDecodeError as e:
+                self.local_memory.append({"content": row_text, "error": e})
+                print(f"JSON parsing error in block: {e}")
+                continue
+
+        return json_objects
 
     def choice_card_for_play(self) -> str:
         last_memories = self.get_last_memories()
