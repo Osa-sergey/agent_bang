@@ -1,5 +1,4 @@
 import random
-from time import sleep
 from typing import Any
 
 from src.agent.Agent import Agent
@@ -15,11 +14,9 @@ class DummyAgent(Agent):
                  player: Player,
                  game: Game,
                  shared_memory: LoggedList):
-        self.sleep_delay = 0
         super().__init__(agent_name, config, player, game, shared_memory)
 
     def choice_card_for_play(self) -> str:
-        sleep(self.sleep_delay)
         if self.player.get_state_log()["cur_hp"] >= len(self.player_hand):
             return "end"
         else:
@@ -37,7 +34,6 @@ class DummyAgent(Agent):
             return "end"
 
     def get_opponent(self, card: Card) -> str:
-        sleep(self.sleep_delay)
         all_players = self.game.get_player_names()
         my_name = self.player.name
         my_index = all_players.index(my_name)
@@ -50,32 +46,25 @@ class DummyAgent(Agent):
         return random.choice(options)
 
     def get_action_type(self, card: Card, options: dict) -> str:
-        sleep(self.sleep_delay)
         return "from_hand"
 
     def get_card_for_steal(self, card: Card, options: dict) -> str:
-        sleep(self.sleep_delay)
         return input(f"Enter the name of the card: ").strip().lower()
 
     def get_indians_response(self) -> str:
-        sleep(self.sleep_delay)
         return "bang"
 
     def get_bang_response(self) -> str:
-        sleep(self.sleep_delay)
         return "miss"
 
     def get_gatling_response(self) -> str:
-        sleep(self.sleep_delay)
         return "miss"
 
     def get_card_for_discard(self, num_cards: int) -> str:
-        sleep(self.sleep_delay)
         discarded = []
         for i in range(num_cards):
             discarded.append(self.player_hand[i].card_id.value)
         return " ".join(discarded)
 
     def react_to_discard_error(self, errors: str):
-        sleep(self.sleep_delay)
         pass
