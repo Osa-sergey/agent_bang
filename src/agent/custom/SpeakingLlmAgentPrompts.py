@@ -1,4 +1,4 @@
-class BaseLlmAgentPrompts:
+class SpeakingLlmAgentPrompts:
     system_prompt = """
 **Task**
 Analyze the game "Bang!" to understand its rules, player roles, card effects, and victory conditions.
@@ -176,7 +176,9 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which card to play now>,
-  “result": <Enter the name of a card in lowercase to play or end to end a turn>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
+  “result": <Enter the name of a card in lowercase to play or end to end a turn>
   "users_role": <Based on your reasoning, generate a list of assumed role for each opponent. 
   Give the answer in the form of a dictionary in which the key is the opponent's name and the value is the expected role.
   Try to understand what each opponent's role is. Valid options [Sheriff, Renegade, Bandits, Helper]>
@@ -198,6 +200,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which opponent to choose now>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the name of opponent>
 }
 """}
@@ -218,6 +222,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which action_type to choose now>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the name of action_type from to options (from_hand, from_play)>
 }
 """}
@@ -240,6 +246,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
  “your_reflection": <Your thoughts on which card to get from opponent>,
+ "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
  “result": <Enter the name of card in lowercase to get from opponent>
 }
 """}
@@ -259,6 +267,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which option to choose>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the respond from to options (bang, pass)>
 }
 """}
@@ -279,6 +289,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which option to choose>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the respond from to options (miss, pass)>
 }
 """}
@@ -299,6 +311,8 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which option to choose>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+   team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter the respond from to options (miss, pass)>
 }
 """}
@@ -321,14 +335,15 @@ Reply in JSON format of the following structure:
 """ + """
 {
   “your_reflection": <Your thoughts on which cards to choose for discard>,
+  "say_to_all": <What you have to say for all players. You can use this text to confuse other players or to
+    team up with someone to win the game. If there is nothing to say, do not add this field>
   “result": <Enter """ + str(num_cards) + """ of the card names, separated by spaces>
 }
 example of output:
 {
-    "your_reflection": "If I need to discard 2 cards and in my hand [bang, miss, fargo, panic] I need to chose less useful  for me"
+    "your_reflection": "If I need to discard 2 cards and in my hand [bang, miss, fargo, panic] I need to chose less useful for me"
     “result": "bang miss"
-}
-"""}
+}"""}
 
     @staticmethod
     def react_to_discard_error_prompt(game_state: dict[str, str]) -> dict[str, str]:
