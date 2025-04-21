@@ -23,23 +23,39 @@ class Agent(ABC):
         self.agent_config = config["agents"][self.name]
         self.__agent_log_path = os.path.join(config["save_path"], "agents", self.name)
         os.makedirs(self.__agent_log_path)
-        self.__local_memory = LoggedList(self._save_local_memory, SavePath.LOCAL_MEMORY)
+        self.__local_log = LoggedList(self._save_local_memory, SavePath.LOCAL_MEMORY)
+        self.__shared_memory = shared_memory
+        self.__last_shared_memory_index = len(shared_memory)
         self.player = player # only for read purpose
         self.game = game # only for read purpose
-        self.__shared_memory = shared_memory
-        self.last_shared_memory_index = len(shared_memory)
 
     @property
     def player_hand(self):
         return self.player.get_state_log()["hand"]
 
     @property
-    def local_memory(self):
-        return self.__local_memory
+    def local_log(self):
+        return self.__local_log
 
     @property
     def shared_memory(self):
         return self.__shared_memory
+
+    def __get_player_current_state(self) -> str:
+        state = self.player.get_state_log()
+        text_state = json.dumps(state, cls=GameEncoder)
+        return text_state
+
+    def __get_last_memories(self) -> str:
+        last_memories = json.dumps(self.shared_memory[self.__last_shared_memory_index: ], cls=GameEncoder)
+        self.__last_shared_memory_index = len(self.shared_memory)
+        return last_memories
+
+    def get_game_state(self) -> dict[str, str]:
+        return {
+            "cur_state": self.__get_player_current_state(),
+            "last_memories": self.__get_last_memories(),
+        }
 
     def _save_local_memory(self, data: dict[str, Any], file_name: str):
         data["dttm"] = datetime.datetime.now(ZoneInfo("Europe/Moscow"))

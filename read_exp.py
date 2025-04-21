@@ -7,7 +7,7 @@ from pprint import pprint
 
 def read_game(path: str):
     shared_memory_log_path = os.path.join(path, 'shared_memory_log.json')
-    agents = glob(os.path.join(path, 'agents', '*', 'local_memory.json'))
+    agents = glob(os.path.join(path, 'agents', '*', 'local_log.json'))
     game_log = get_jsonl(shared_memory_log_path)
     for agent in agents:
         game_log.extend(get_jsonl(agent))

@@ -1,4 +1,4 @@
-exp_name: test_17
+exp_name: new_agents_approach
 save_path: save/${exp_name}
 gui: false
 seed: 42
@@ -33,19 +33,24 @@ agents:
   # name from players
   serg:
     agent_id: base
-    agent_type: coop_multi_llm_agent # user_agent dummy_agent base_llm_agent speaking_llm_agent, coop_llm_agent, base_multi_llm_agent coop_multi_llm_agent choice_coop_multi_llm_agent
+    agent_type: base_llm_agent # user_agent dummy_agent base_llm_agent speaking_llm_agent, coop_llm_agent, base_multi_llm_agent coop_multi_llm_agent choice_coop_multi_llm_agent
+    context_len: 20
   andy:
     agent_id: base
-    agent_type: coop_llm_agent
+    agent_type: base_llm_agent
+    context_len: 20
   anna:
     agent_id: base
-    agent_type: coop_llm_agent
+    agent_type: base_llm_agent
+    context_len: 20
   igor:
     agent_id: base
-    agent_type: coop_llm_agent
+    agent_type: base_llm_agent
+    context_len: 20
   john:
     agent_id: base
-    agent_type: coop_multi_llm_agent
+    agent_type: base_llm_agent
+    context_len: 20
 
 cards: # base card set
   bang: 25
