@@ -6,11 +6,30 @@ from enum import Enum
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from openai import OpenAI
+
 from src.game.Card import Card
 from src.emulator.LoggedList import LoggedList, SavePath
 from src.game.Game import Game
 from src.game.Player import Player
 from src.game.Utils import GameEncoder
+
+class AgentType(Enum):
+    DEEPSEEK = 0
+
+
+def init_agent(agent_type: AgentType = AgentType.DEEPSEEK):
+    client = None
+    match agent_type:
+        case AgentType.DEEPSEEK:
+            deepseek_api_key = os.getenv('DEEPSEEK_KEY', "empty")
+            if deepseek_api_key == "empty":
+                raise Exception("Add api key to env variable DEEPSEEK_KEY")
+            client = OpenAI(
+                api_key= deepseek_api_key,
+                base_url="https://api.deepseek.com"
+            )
+    return client
 
 
 class Agent(ABC):
