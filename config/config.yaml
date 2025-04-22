@@ -1,4 +1,4 @@
-exp_name: new_agents_approach
+exp_name: new_agents_approach8
 save_path: save/${exp_name}
 gui: false
 seed: 42
@@ -33,24 +33,40 @@ agents:
   # name from players
   serg:
     agent_id: base
-    agent_type: base_llm_agent # user_agent dummy_agent base_llm_agent speaking_llm_agent, coop_llm_agent, base_multi_llm_agent coop_multi_llm_agent choice_coop_multi_llm_agent
+    agent_type: sum_coop_multi_llm_agent # user_agent dummy_agent base_llm_agent speaking_llm_agent, coop_llm_agent, base_multi_llm_agent coop_multi_llm_agent coop_multi_llm_agent_v2 sum_coop_multi_llm_agent
     context_len: 20
+    agents_map: ${agents_map}
   andy:
     agent_id: base
-    agent_type: base_llm_agent
+    agent_type: sum_coop_multi_llm_agent
     context_len: 20
+    agents_map: ${agents_map}
   anna:
     agent_id: base
-    agent_type: base_llm_agent
+    agent_type: sum_coop_multi_llm_agent
     context_len: 20
+    agents_map: ${agents_map}
   igor:
     agent_id: base
-    agent_type: base_llm_agent
+    agent_type: sum_coop_multi_llm_agent
     context_len: 20
+    agents_map: ${agents_map}
   john:
     agent_id: base
-    agent_type: base_llm_agent
+    agent_type: sum_coop_multi_llm_agent
     context_len: 20
+    agents_map: ${agents_map}
+
+agents_map:
+  choice_card_for_play: ["log_analyzer", "role_finder", "cooperator", "player", "summarizer"] #cooperator можно менять последовательность
+  get_opponent: ["player", "summarizer"]
+  get_action_type: ["player", "summarizer"]
+  get_card_for_steal: ["player", "summarizer"]
+  get_indians_response: ["log_analyzer", "cooperator", "player", "summarizer"] #cooperator
+  get_bang_response: ["log_analyzer", "cooperator", "player", "summarizer"] #cooperator
+  get_gatling_response: ["log_analyzer", "cooperator", "player", "summarizer"] #cooperator
+  get_card_for_discard: ["player", "summarizer"]
+  react_to_discard_error: ["player", "summarizer"]
 
 cards: # base card set
   bang: 25
