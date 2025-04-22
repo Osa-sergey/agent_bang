@@ -36,26 +36,36 @@ agents:
     agent_type: sum_coop_multi_llm_agent # user_agent dummy_agent base_llm_agent speaking_llm_agent, coop_llm_agent, base_multi_llm_agent coop_multi_llm_agent coop_multi_llm_agent_v2 sum_coop_multi_llm_agent
     context_len: 20
     agents_map: ${agents_map}
+    base_gen_conf: ${base_gen_conf}
+    summary_gen_conf: ${base_gen_conf}
   andy:
     agent_id: base
     agent_type: sum_coop_multi_llm_agent
     context_len: 20
     agents_map: ${agents_map}
+    base_gen_conf: ${base_gen_conf}
+    summary_gen_conf: ${base_gen_conf}
   anna:
     agent_id: base
     agent_type: sum_coop_multi_llm_agent
     context_len: 20
     agents_map: ${agents_map}
+    base_gen_conf: ${base_gen_conf}
+    summary_gen_conf: ${base_gen_conf}
   igor:
     agent_id: base
     agent_type: sum_coop_multi_llm_agent
     context_len: 20
     agents_map: ${agents_map}
+    base_gen_conf: ${base_gen_conf}
+    summary_gen_conf: ${base_gen_conf}
   john:
     agent_id: base
     agent_type: sum_coop_multi_llm_agent
     context_len: 20
     agents_map: ${agents_map}
+    base_gen_conf: ${base_gen_conf}
+    summary_gen_conf: ${base_gen_conf}
 
 agents_map:
   choice_card_for_play: ["log_analyzer", "role_finder", "cooperator", "player", "summarizer"] #cooperator можно менять последовательность
@@ -67,6 +77,11 @@ agents_map:
   get_gatling_response: ["log_analyzer", "cooperator", "player", "summarizer"] #cooperator
   get_card_for_discard: ["player", "summarizer"]
   react_to_discard_error: ["player", "summarizer"]
+
+base_gen_conf:
+  model: deepseek-chat
+  temperature: 0.7
+  max_tokens: 700
 
 cards: # base card set
   bang: 25

@@ -28,6 +28,7 @@ class BaseLlmAgent(Agent):
         self._errors = 0
         super().__init__(agent_name, config, player, game, shared_memory)
         self.MAX_CONTEXT_LEN = self.agent_config["context_len"]
+        self.base_gen_conf = self.agent_config["base_gen_conf"]
 
     def ask_llm(self, prompt: dict[str, str], so_answer_field_name: Union[str, None] = "result") -> str:
         self.trim_chat_context()
@@ -57,15 +58,9 @@ class BaseLlmAgent(Agent):
         self.console.print(f"[blue] Prompt: \n{prompt} [/blue]", style="bold")
         self.local_log.append({"content": prompt})
         self.chat_context.append({"role": "user", "content": prompt})
-        response = self.client.chat.completions.create(
-            model="deepseek-chat",  # deepseek-reasoner или deepseek-chat
-            messages=self.chat_context,
-            temperature=0.7,
-            max_tokens=700,
-            stream=False
-        )
 
-        answer = response.choices[0].message.content
+        answer = self.llm_api_call(self.chat_context, self.base_gen_conf)
+
         print("Raw answer: ")
         pprint.pprint(answer)
 
@@ -74,6 +69,17 @@ class BaseLlmAgent(Agent):
 
         json_objects, errors = self.extract_json_objects(row_text=answer)
         return answer, json_objects, errors
+
+    def llm_api_call(self, messages, gen_config: dict[str, Any]) -> str:
+        response = self.client.chat.completions.create(
+            model=gen_config["model"],
+            messages=messages,
+            temperature=gen_config["temperature"],
+            max_tokens=gen_config["max_tokens"],
+            stream=False
+        )
+
+        return response.choices[0].message.content
 
     def trim_chat_context(self):
         if len(self.chat_context) > self.MAX_CONTEXT_LEN:

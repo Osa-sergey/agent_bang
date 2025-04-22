@@ -29,6 +29,7 @@ class SumCoopMultiLlmAgent(CoopMultiLlmAgentV2):
                        "log_analyzer": {"system_prompt": self.prompts.log_analyzer_prompt},
                        "cooperator": {"system_prompt": self.prompts.cooperator_prompt},
                        "summarizer": {"system_prompt": self.prompts.summarizer_prompt}, }
+        self.summary_gen_conf =  self.agent_config["summary_gen_conf"]
 
     def generate_answer(self, prompt: dict[str, str], agents: Union[list, None] = None, regenerate: bool = False):
         task_context = []
@@ -61,14 +62,8 @@ class SumCoopMultiLlmAgent(CoopMultiLlmAgentV2):
                 system_prompt = [{"role": "system", "content": self.agents[agent]['system_prompt']}]
                 all_context = system_prompt + self.chat_context + task_context
 
-            response = self.client.chat.completions.create(
-                model="deepseek-chat",  # deepseek-reasoner или deepseek-chat
-                messages=all_context,
-                temperature=0.7,
-                max_tokens=700,
-                stream=False
-            )
-            answer = response.choices[0].message.content
+            answer = self.llm_api_call(all_context, self.base_gen_conf)
+
             print("===" * 30)
             print(f"Agent name: {agent}")
             print("Raw answer: ")
@@ -93,14 +88,9 @@ class SumCoopMultiLlmAgent(CoopMultiLlmAgentV2):
         if not regenerate:
             system_prompt = [{"role": "system", "content": self.prompts.task_summarize_prompt}]
             all_context = system_prompt + self.chat_context + task_context
-            response = self.client.chat.completions.create(
-                model="deepseek-chat",  # deepseek-reasoner или deepseek-chat
-                messages=all_context,
-                temperature=0.7,
-                max_tokens=700,
-                stream=False
-            )
-            summarization = response.choices[0].message.content
+
+            summarization = self.llm_api_call(all_context, self.summary_gen_conf)
+        
             print("===" * 30)
             print(f"Summarization")
             print("Raw answer: ")

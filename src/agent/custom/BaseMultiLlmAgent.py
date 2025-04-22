@@ -32,6 +32,7 @@ class BaseMultiLlmAgent(Agent):
         super().__init__(agent_name, config, player, game, shared_memory)
         self.agents_map = self.agent_config['agents_map']
         self.MAX_CONTEXT_LEN = self.agent_config["context_len"]
+        self.base_gen_conf = self.agent_config["base_gen_conf"]
 
     @staticmethod
     def base_agents_list() -> list:
@@ -97,14 +98,8 @@ class BaseMultiLlmAgent(Agent):
                 system_prompt = [{"role": "system", "content": self.agents[agent]['system_prompt']}]
                 all_context = system_prompt + self.chat_context + task_context
 
-            response = self.client.chat.completions.create(
-                model="deepseek-chat",  # deepseek-reasoner или deepseek-chat
-                messages=all_context,
-                temperature=0.7,
-                max_tokens=700,
-                stream=False
-            )
-            answer = response.choices[0].message.content
+            answer = self.llm_api_call(all_context, self.base_gen_conf)
+
             print("===" * 30)
             print(f"Agent name: {agent}")
             print("Raw answer: ")
@@ -118,6 +113,17 @@ class BaseMultiLlmAgent(Agent):
 
         json_objects, errors = self.extract_json_objects(row_text=answer)
         return answer, json_objects, errors
+
+    def llm_api_call(self, messages, gen_config: dict[str, Any]) -> str:
+        response = self.client.chat.completions.create(
+            model=gen_config["model"],
+            messages=messages,
+            temperature=gen_config["temperature"],
+            max_tokens=gen_config["max_tokens"],
+            stream=False
+        )
+
+        return response.choices[0].message.content
 
     def trim_chat_context(self):
         if len(self.chat_context) > self.MAX_CONTEXT_LEN:

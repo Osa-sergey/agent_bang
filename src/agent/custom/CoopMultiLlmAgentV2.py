@@ -89,14 +89,8 @@ class CoopMultiLlmAgentV2(BaseMultiLlmAgent):
                 system_prompt = [{"role": "system", "content": self.agents[agent]['system_prompt']}]
                 all_context = system_prompt + self.chat_context + task_context
 
-            response = self.client.chat.completions.create(
-                model="deepseek-chat",  # deepseek-reasoner или deepseek-chat
-                messages=all_context,
-                temperature=0.7,
-                max_tokens=700,
-                stream=False
-            )
-            answer = response.choices[0].message.content
+            answer = self.llm_api_call(all_context, self.base_gen_conf)
+
             print("===" * 30)
             print(f"Agent name: {agent}")
             print("Raw answer: ")
