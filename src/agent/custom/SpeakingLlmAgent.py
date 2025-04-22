@@ -30,7 +30,7 @@ class SpeakingLlmAgent(BaseLlmAgent):
             or (json_objects and so_answer_field_name and not json_objects[0].get(so_answer_field_name))):
 
             prompt = {"prompt": self.prompts.get_regenerate_prompt(so_answer_field_name, errors)}
-            answer, json_objects, errors = self.generate_answer(prompt, regenerate=True)
+            answer, json_objects, errors = self.generate_answer(prompt)
 
         json_object = json_objects[0]
         users_role = json_object.get("users_role")

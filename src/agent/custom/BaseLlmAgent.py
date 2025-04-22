@@ -1,22 +1,16 @@
 import json
-import os
 import pprint
 from typing import Any, Union
 import re
-from enum import Enum
 
-from openai import OpenAI
 from rich.console import Console
 
-from src.agent.Agent import Agent
+from src.agent.Agent import Agent, init_agent
 from src.agent.custom.BaseLlmAgentPrompts import BaseLlmAgentPrompts
 from src.emulator.LoggedList import LoggedList
 from src.game.Card import Card
 from src.game.Game import Game
 from src.game.Player import Player
-
-class AgentType(Enum):
-    DEEPSEEK = 0
 
 class BaseLlmAgent(Agent):
     def __init__(self, agent_name: str,
@@ -25,7 +19,7 @@ class BaseLlmAgent(Agent):
                  game: Game,
                  shared_memory: LoggedList):
         self.console = Console(force_terminal=True)
-        self.client = self.init_agent()
+        self.client = init_agent()
         self.prompts = BaseLlmAgentPrompts()
         self.system_prompt = self.prompts.system_prompt
         self.chat_context = [
@@ -35,20 +29,6 @@ class BaseLlmAgent(Agent):
         super().__init__(agent_name, config, player, game, shared_memory)
         self.MAX_CONTEXT_LEN = self.agent_config["context_len"]
 
-    @staticmethod
-    def init_agent(agent_type: AgentType = AgentType.DEEPSEEK):
-        client = None
-        match agent_type:
-            case AgentType.DEEPSEEK:
-                deepseek_api_key = os.getenv('DEEPSEEK_KEY', "empty")
-                if deepseek_api_key == "empty":
-                    raise Exception("Add api key to env variable DEEPSEEK_KEY")
-                client = OpenAI(
-                    api_key= deepseek_api_key,
-                    base_url="https://api.deepseek.com"
-                )
-        return client
-
     def ask_llm(self, prompt: dict[str, str], so_answer_field_name: Union[str, None] = "result") -> str:
         self.trim_chat_context()
         answer, json_objects, errors = self.generate_answer(prompt)
@@ -57,7 +37,7 @@ class BaseLlmAgent(Agent):
             or (json_objects and so_answer_field_name and not json_objects[0].get(so_answer_field_name))):
 
             prompt = {"prompt": self.prompts.get_regenerate_prompt(so_answer_field_name, errors)}
-            answer, json_objects, errors = self.generate_answer(prompt, regenerate=True)
+            answer, json_objects, errors = self.generate_answer(prompt)
 
         json_object = json_objects[0]
         users_role = json_object.get("users_role")
@@ -72,7 +52,7 @@ class BaseLlmAgent(Agent):
         self.console.print(f"[green]LLM answer:[/green] \n{result}", style="bold")
         return result
 
-    def generate_answer(self, prompt: dict[str, str], regenerate: bool = False):
+    def generate_answer(self, prompt: dict[str, str]):
         prompt = prompt['prompt']
         self.console.print(f"[blue] Prompt: \n{prompt} [/blue]", style="bold")
         self.local_log.append({"content": prompt})
