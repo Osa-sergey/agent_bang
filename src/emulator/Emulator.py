@@ -65,9 +65,11 @@ class GameEmulator:
     @staticmethod
     def get_all_loaded_agent_classes() -> dict[str, Any]:
         classes = {}
-        for _, modname, _ in pkgutil.iter_modules(agent_module.__path__):
-            module = importlib.import_module(f'src.agent.custom.{modname}')
-            classes[underscore(str(modname))] = module
+        for _, module_name, _ in pkgutil.iter_modules(agent_module.__path__):
+            module = importlib.import_module(f'src.agent.custom.{module_name}')
+            module_name = underscore(str(module_name))
+            if module_name.find("prompt") == -1:
+                classes[module_name] = module
 
         print("Find agent classes:", classes.keys())
         return classes
