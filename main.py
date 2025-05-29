@@ -1,7 +1,14 @@
+import argparse
+
 from src.emulator.Emulator import GameEmulator
 
 if __name__ == '__main__':
-    emulator = GameEmulator('config/config.yaml')
+    parser = argparse.ArgumentParser(description="Bang emulator")
+    parser.add_argument("config", type=str, help="config.yaml")
+
+    args = parser.parse_args()
+
+    emulator = GameEmulator(f'config/{args.config}')
     emulator.play_game()
 
 
