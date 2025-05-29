@@ -60,20 +60,20 @@ class Agent(ABC):
     def shared_memory(self):
         return self.__shared_memory
 
-    def __get_player_current_state(self) -> str:
+    def get_player_current_state(self) -> str:
         state = self.player.get_state_log()
         text_state = json.dumps(state, cls=GameEncoder)
         return text_state
 
-    def __get_last_memories(self) -> str:
+    def get_last_memories(self) -> str:
         last_memories = json.dumps(self.shared_memory[self.__last_shared_memory_index: ], cls=GameEncoder)
         self.__last_shared_memory_index = len(self.shared_memory)
         return last_memories
 
     def get_game_state(self) -> dict[str, str]:
         return {
-            "cur_state": self.__get_player_current_state(),
-            "last_memories": self.__get_last_memories(),
+            "cur_state": self.get_player_current_state(),
+            "last_memories": self.get_last_memories(),
         }
 
     def _save_local_memory(self, data: dict[str, Any], file_name: str):

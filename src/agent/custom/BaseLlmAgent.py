@@ -160,14 +160,14 @@ class BaseLlmAgent(Agent):
 
     def get_card_for_discard(self, num_cards: int) -> str:
         if self._errors < 3:
-            game_state = {"num_cards": num_cards, "cur_state": self.__get_player_current_state()}
+            game_state = {"num_cards": num_cards, "cur_state": self.get_player_current_state()}
             prompt = self.prompts.get_card_for_discard_prompt(game_state=game_state)
             return self.ask_llm(prompt)
         else:
             return self.base_card_for_discard(num_cards)
 
     def react_to_discard_error(self, errors: str):
-        game_state = {"errors": errors, "cur_state": self.__get_player_current_state()}
+        game_state = {"errors": errors, "cur_state": self.get_player_current_state()}
         prompt = self.prompts.react_to_discard_error_prompt(game_state=game_state)
         self.ask_llm(prompt, so_answer_field_name=None)
         self.console.print(f"[red]ERROR:[/red] ERROR ON DISCARD", style="bold")
