@@ -9,6 +9,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print(f"Config name: {args.config}")
+
     emulator = GameEmulator(f'config/{args.config}')
     emulator.play_game()
 
