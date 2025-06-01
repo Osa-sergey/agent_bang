@@ -1,3 +1,4 @@
+import argparse
 import json
 import os.path
 import glob
@@ -45,6 +46,7 @@ def analyze_exp(exp_name: str) -> dict:
         game_state = {}
         cur_card = ""
         cur_player_name = ""
+        end_of_run = False
         for event in game_log:
             if event.get("value"):
                 value = event['value']
@@ -74,7 +76,7 @@ def analyze_exp(exp_name: str) -> dict:
 
                     case "game_result":
                         game_statistic['game_result'] = value['name']
-
+                        end_of_run = True
                     case "play_card":
                         if value != 'end':
                             cur_card = value['card']['card_id']
@@ -134,6 +136,10 @@ def analyze_exp(exp_name: str) -> dict:
                     if not stat[cur_player_name].get('users_role', []):
                         stat[cur_player_name]['users_role'] = []
                     stat[cur_player_name]['users_role'].append({"game_step": game_step, "users_role": users_role})
+
+            if end_of_run:
+                break
+
         game_statistic['max_game_step'] = game_step + 1
         game_statistic['players'] = stat
         stats.append(game_statistic)
@@ -172,6 +178,12 @@ def get_metrics(stats: dict) -> dict:
     for name, metric in get_cards_fails_metrics(stats).items():
         metrics[name].update(metric)
 
+    print(f"avg_surv_time_percent_of bandit_group {metrics['avg_surv_time_percent_of_bandit_group']}")
+    print(f"avg_surv_time_percent_of sherif_group {metrics.get('avg_surv_time_percent_of_sherif_group', "not in exp")}")
+
+    del metrics['avg_surv_time_percent_of_bandit_group']
+    del metrics['avg_surv_time_percent_of_sherif_group']
+
     for player_name, metric in metrics.items():
         print(f"Player: {player_name}")
         print(f"Player role: {metric["player_role"]}")
@@ -205,9 +217,6 @@ def get_metrics(stats: dict) -> dict:
 
         print()
         print("===" * 30)
-
-    print(f"avg_surv_time_percent_of bandit_group {metrics['avg_surv_time_percent_of_bandit_group']}")
-    print(f"avg_surv_time_percent_of sherif_group {metrics.get('avg_surv_time_percent_of_sherif_group', "not in exp")}")
 
 def get_death_metrics(stats: dict) -> dict:
     metrics = defaultdict(dict)
@@ -245,7 +254,7 @@ def get_death_metrics(stats: dict) -> dict:
     for group, players in allies_groups.items():
         surv_time_percent = [death_steps[player]["surv_time_percent"] for player in players]
         mins = [min(arr[i] for arr in surv_time_percent) for i in range(len(surv_time_percent[0]))]
-        metrics[f"avg_surv_time_percent_of_{group}_group"] = sum(mins) / len(mins)
+        metrics[f"avg_surv_time_percent_of_{group}_group"] = {"res": sum(mins) / len(mins)}
 
     for player, death_stat in death_steps.items():
         np_death_steps = np.array(death_stat['death_step'])
@@ -361,9 +370,9 @@ def get_efficiency_metrics(stats: dict) -> dict:
 
         metrics[name]['correct_role_assumption'] = roles[name]['correct'] /  roles[name]['all']
 
-        metrics[name]['correct_role_assumption_bandit'] = roles[name]['bandit_correct'] / roles[name]['bandit']
-        metrics[name]['correct_role_assumption_sherif_assistant'] = roles[name]['sherif_assistant_correct'] / roles[name]['sherif_assistant']
-        metrics[name]['correct_role_assumption_renegade'] = roles[name]['renegade_correct'] / roles[name]['renegade']
+        metrics[name]['correct_role_assumption_bandit'] = 0 if roles[name]['bandit'] == 0 else roles[name]['bandit_correct'] / roles[name]['bandit']
+        metrics[name]['correct_role_assumption_sherif_assistant'] = 0 if roles[name]['sherif_assistant'] == 0 else roles[name]['sherif_assistant_correct'] / roles[name]['sherif_assistant']
+        metrics[name]['correct_role_assumption_renegade'] = 0 if roles[name]['renegade'] == 0 else roles[name]['renegade_correct'] / roles[name]['renegade']
     return metrics
 
 def get_attack_info(players_role, stat, card_type, game_step, attacker, defender):
@@ -373,12 +382,13 @@ def get_attack_info(players_role, stat, card_type, game_step, attacker, defender
     fact_correct_attack = check_correct_attack(attacker_role, defender_role)
     assumption_correct_attack = "unk"
 
-    assumptions = stat[attacker]["users_role"]
+    assumptions = stat['players'][attacker]["users_role"]
     for assumption in assumptions:
         if assumption["game_step"] == game_step:
             defender_role = assumption["users_role"].get(defender, "unk")
             if defender_role != "unk":
                 assumption_correct_attack = check_correct_attack(attacker_role, defender_role)
+            break
 
     mass_attack = card_type != "bang"
 
@@ -419,5 +429,9 @@ def get_cards_fails_metrics(stats: dict) -> dict:
 
 
 if __name__ == "__main__":
-    statistic = analyze_exp(exp_name='new_agents_approach2')
+    parser = argparse.ArgumentParser(description="Metric analyze")
+    parser.add_argument("exp", type=str)
+    args = parser.parse_args()
+
+    statistic = analyze_exp(exp_name=args.exp)
     metrics = get_metrics(statistic)

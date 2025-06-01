@@ -282,7 +282,7 @@ class Game:
             alive_num += 1
         if alive_roles[Role.SHERIFF] == 1 and alive_roles[Role.BANDIT] == 0 and alive_roles[Role.RENEGADE] == 0:
             return GameResult.SHERIFF_WIN
-        elif alive_roles[Role.SHERIFF] == 0 and alive_roles[Role.BANDIT] > 0:
+        elif alive_roles[Role.SHERIFF] == 0 and (alive_roles[Role.BANDIT] > 0 or alive_roles[Role.RENEGADE] > 0):
             return GameResult.BANDIT_WIN
         elif alive_roles[Role.RENEGADE] == 1 and alive_num == 1:
             return GameResult.RENEGADE_WIN

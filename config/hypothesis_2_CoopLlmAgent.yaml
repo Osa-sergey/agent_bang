@@ -1,0 +1,83 @@
+exp_name: hypothesis_2_CoopLlmAgent
+save_path: save/${exp_name}
+gui: false
+seed: 42
+players_number: 5
+players:
+  -
+      name: serg # names must be unique
+      role: sherif
+      max_hp: 4
+
+  -
+      name: andy
+      role: bandit
+      max_hp: 4
+
+  -
+      name: anna
+      role: sherif_assistant
+      max_hp: 4
+
+  -
+      name: igor
+      role: bandit
+      max_hp: 4
+
+  -
+      name: john
+      role: renegade
+      max_hp: 4
+
+agents:
+  # name from players
+  serg:
+    agent_id: base
+    agent_type: coop_llm_agent # user_agent dummy_agent base_llm_agent speaking_llm_agent, coop_llm_agent, base_multi_llm_agent coop_multi_llm_agent coop_multi_llm_agent_v2 sum_coop_multi_llm_agent
+    context_len: 10
+    base_gen_conf: ${base_gen_conf_600}
+  andy:
+    agent_id: base
+    agent_type: speaking_llm_agent
+    context_len: 10
+    base_gen_conf: ${base_gen_conf_600}
+  anna:
+    agent_id: base
+    agent_type: coop_llm_agent
+    context_len: 10
+    base_gen_conf: ${base_gen_conf_600}
+  igor:
+    agent_id: base
+    agent_type: speaking_llm_agent
+    context_len: 10
+    base_gen_conf: ${base_gen_conf_600}
+  john:
+    agent_id: base
+    agent_type: speaking_llm_agent
+    context_len: 10
+    base_gen_conf: ${base_gen_conf_600}
+
+base_gen_conf_600:
+  model: deepseek-chat
+  temperature: 0.7
+  max_tokens: 600
+
+cards: # base card set
+  bang: 25
+  beer: 6
+  miss: 12
+  mustang: 2
+  scope: 1
+  hottie: 4
+  saloon: 1
+  gatling: 1
+  panic: 4
+  indians: 2
+  fargo: 1
+  stagecoach: 2
+  volkanic: 2
+  scofield: 3
+  remington: 1
+  carbine: 1
+  winchester: 1
+
